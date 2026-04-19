@@ -3,9 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
     <title>Document</title>
   </head>
   <body>
-    Hello, World
+    <main class="table" id="customers_table">
+      <section class="table__header">
+        <h1 contenteditable="true">Cubemeet Name</h1>
+        <h1 contenteditable="true">n Cube – Round n</h1>
+      </section>
+      <div class="add_expense">
+        <button class="add_expense_btn" onclick="addSolver()">
+          + Add Solver
+        </button>
+      </div>
+
+      <section class="table__body">
+        <table>
+          <colgroup>
+            <col style="width: 6%" />
+            <col style="width: 10%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+            <col style="width: 12%" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
+              <th>Average</th>
+              <th>Best</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- <tr>
+              <td>1</td>
+              <td>Renz</td>
+
+              <td><input type="text" class="solve" /></td>
+              <td><input type="text" class="solve" /></td>
+              <td><input type="text" class="solve" /></td>
+              <td><input type="text" class="solve" /></td>
+              <td><input type="text" class="solve" /></td>
+
+              <td class="average">-</td>
+              <td class="best">-</td>
+            </tr> -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   </body>
 </html>
