@@ -6,7 +6,7 @@
 
 # app = Flask(__name__)
 # app.secret_key = 'cubemeettara'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cubechamps_user:rCxlw73610w9oU60Q2srBvmq9ULk2Pav@dpg-d7i7059j2pic73akrnv0-a.virginia-postgres.render.com/cubechamps'
 # db = SQLAlchemy(app)
 
 # class Expense(db.Model):
