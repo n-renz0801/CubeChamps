@@ -244,6 +244,8 @@ th {
   transition: all 0.3s ease;
   background-color: #425e6a;
   cursor: pointer;
+  color: white;
+  font-weight: 500;
 }
 
 .add_expense_btn:active {
@@ -251,7 +253,7 @@ th {
 }
 
 .rank.top3 {
-  background-color: #526c5b; /* soft gold/yellow */
+  background-color: #7aa78a; /* soft gold/yellow */
   font-weight: 500;
 }
 
