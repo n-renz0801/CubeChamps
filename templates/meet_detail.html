@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+
+<h3>{{ meet.name }}</h3>
+<p>Date: {{ meet.date }}</p>
+
+<hr />
+
+<h4>Events</h4>
+
+{% for event in meet.events %}
+<div>
+  <p><strong>{{ event.name }}</strong></p>
+
+  {% for i in range(event.rounds) %}
+  <p>Round {{ i + 1 }}</p>
+  {% endfor %}
+</div>
+<br />
+{% else %}
+<p>No events yet</p>
+{% endfor %}
+
+<br />
+
+<a href="{{ url_for('home') }}">
+  <button>Back to Home</button>
+</a>
+
+{% endblock %}

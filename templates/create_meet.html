@@ -1,0 +1,103 @@
+{% extends "base.html" %} {% block content %}
+
+<h3>Create New Meet</h3>
+
+<form method="POST">
+  <label>Meet Name:</label><br />
+  <input type="text" name="meet_name" required /><br /><br />
+
+  <label>Event Date:</label><br />
+  <input type="date" name="event_date" required /><br /><br />
+
+  <h4>Events</h4>
+
+  <table border="1" id="events-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Rounds</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="events-body">
+      <tr>
+        <td>
+          <select name="event_name[]" required>
+            <option value="3x3">3x3</option>
+            <option value="2x2">2x2</option>
+            <option value="4x4">4x4</option>
+            <option value="5x5">5x5</option>
+            <option value="6x6">6x6</option>
+            <option value="7x7">7x7</option>
+            <option value="Pyraminx">Pyraminx</option>
+            <option value="Megaminx">Megaminx</option>
+            <option value="Skewb">Skewb</option>
+          </select>
+        </td>
+
+        <td>
+          <input type="number" name="rounds[]" min="1" value="1" required />
+        </td>
+
+        <td>
+          <button type="button" onclick="removeRow(this)">Remove</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br />
+
+  <button type="button" onclick="addRow()">Add Event</button>
+
+  <br /><br />
+
+  <button type="submit">Create Meet</button>
+</form>
+
+<br />
+
+<a href="{{ url_for('home') }}">
+  <button>Cancel</button>
+</a>
+
+<script>
+  function addRow() {
+    const table = document.getElementById("events-body");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>
+            <select name="event_name[]" required>
+                <option value="3x3">3x3</option>
+                <option value="2x2">2x2</option>
+                <option value="4x4">4x4</option>
+                <option value="5x5">5x5</option>
+                <option value="6x6">6x6</option>
+                <option value="7x7">7x7</option>
+                <option value="Pyraminx">Pyraminx</option>
+                <option value="Megaminx">Megaminx</option>
+                <option value="Skewb">Skewb</option>
+            </select>
+        </td>
+
+        <td>
+            <input type="number" name="rounds[]" min="1" value="1" required>
+        </td>
+
+        <td>
+            <button type="button" onclick="removeRow(this)">Remove</button>
+        </td>
+    `;
+
+    table.appendChild(row);
+  }
+
+  function removeRow(button) {
+    const row = button.parentElement.parentElement;
+    row.remove();
+  }
+</script>
+
+{% endblock %}

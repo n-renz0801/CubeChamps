@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+
+<h3>All Meets</h3>
+
+<ul>
+  {% for meet in meets %}
+  <li>
+    <a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
+      {{ meet.name }} - {{ meet.date }}
+    </a>
+  </li>
+  {% else %}
+  <li>No meets yet</li>
+  {% endfor %}
+</ul>
+
+<br />
+
+<a href="{{ url_for('create_meet') }}">
+  <button>Create Meet</button>
+</a>
+
+{% endblock %}

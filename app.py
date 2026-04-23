@@ -4,27 +4,26 @@
 # from werkzeug.security import generate_password_hash, check_password_hash
 # from flask import session
 
-# app = Flask(__name__)
-# app.secret_key = 'cubemeettara'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cubechamps_user:rCxlw73610w9oU60Q2srBvmq9ULk2Pav@dpg-d7i7059j2pic73akrnv0-a.virginia-postgres.render.com/cubechamps'
-# db = SQLAlchemy(app)
 
-# class Expense(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     amount = db.Column(db.Float)
-#     description = db.Column(db.String(300))
-#     date = db.Column(db.DateTime, default=datetime.utcnow)
-
-#     def __repr__(self):
-#         return '<Expense %r>' % self.id
-    
-# @app.route('/')
-# def home():
-#     return render_template('index.html')
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True)
+# cubechamps/
+# │
+# ├── app.py
+# ├── models.py
+# ├── requirements.txt
+# │
+# ├── templates/
+# │   ├── base.html
+# │   ├── home.html
+# │   ├── create_meet.html
+# │   ├── meet_detail.html
+# │
+# ├── static/
+# │   ├── css/
+# │   │   └── styles.css
+# │   ├── js/
+# │   │   ├── create_meet.js
+# │   │   └── main.js
+# │   └── images/
 
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -34,7 +33,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'cubemeettara'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cubechamps_user:rCxlw73610w9oU60Q2srBvmq9ULk2Pav@dpg-d7i7059j2pic73akrnv0-a.virginia-postgres.render.com/cubechamps'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cubechamps_user:rCxlw73610w9oU60Q2srBvmq9ULk2Pav@dpg-d7i7059j2pic73akrnv0-a.virginia-postgres.render.com/cubechamps'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
 # ── Models ────────────────────────────────────────────────────────────────────
@@ -85,65 +85,75 @@ class Event(db.Model):
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
-def index():
+def home():
     meets = CubeMeet.query.order_by(CubeMeet.date.desc()).all()
-    return render_template("index.html", meets=meets)
+    return render_template("home.html", meets=meets)
 
 
-@app.route("/cubemeet/new", methods=["GET"])
-def new_cubemeet():
-    return render_template("cubemeet/new.html")
+@app.route('/meet/create', methods=['GET', 'POST'])
+def create_meet():
+    if request.method == 'POST':
+        meet_name = request.form.get('meet_name')
+        event_date = request.form.get('event_date')
 
-@app.route("/cubemeet/new", methods=["POST"])
-def create_cubemeet():
-    name         = request.form.get("name")
-    date         = request.form.get("date")
-    event_names  = request.form.getlist("event_name")
-    event_rounds = request.form.getlist("event_rounds")
+        event_names = request.form.getlist('event_name[]')
+        rounds_list = request.form.getlist('rounds[]')
 
-    meet = CubeMeet(name=name, date=datetime.strptime(date, "%Y-%m-%d").date())
-    db.session.add(meet)
-    db.session.flush()  # gets meet.id before commit
+        # Create meet
+        new_meet = CubeMeet(
+            name=meet_name,
+            date=datetime.strptime(event_date, '%Y-%m-%d')
+        )
+        db.session.add(new_meet)
+        db.session.commit()
 
-    for event_name, round_count in zip(event_names, event_rounds):
-        if event_name:
-            db.session.add(Event(cubemeet_id=meet.id, name=event_name, rounds=int(round_count)))
+        # Create multiple events
+        for name, rounds in zip(event_names, rounds_list):
+            event = Event(
+                name=name,
+                rounds=int(rounds),
+                cubemeet_id=new_meet.id
+            )
+            db.session.add(event)
 
-    db.session.commit()
-    return redirect(url_for("meet_hub", meet_id=meet.id))
+        db.session.commit()
+
+        return redirect(url_for('home'))
+
+    return render_template('create_meet.html')
 
 
-@app.route("/cubemeet/<int:meet_id>")
-def meet_hub(meet_id):
+@app.route("/meet/<int:meet_id>")
+def meet_detail(meet_id):
     meet = CubeMeet.query.get_or_404(meet_id)
-    return render_template("cubemeet/hub.html", meet=meet)
+    return render_template("meet_detail.html", meet=meet)
 
-@app.route("/cubemeet/<int:meet_id>/competitors")
-def meet_competitors(meet_id):
-    meet = CubeMeet.query.get_or_404(meet_id)
-    return render_template("cubemeet/competitors.html", meet=meet)
+# @app.route("/cubemeet/<int:meet_id>/competitors")
+# def meet_competitors(meet_id):
+#     meet = CubeMeet.query.get_or_404(meet_id)
+#     return render_template("cubemeet/competitors.html", meet=meet)
 
-@app.route("/cubemeet/<int:meet_id>/results")
-def meet_results(meet_id):
-    meet = CubeMeet.query.get_or_404(meet_id)
-    return render_template("cubemeet/results.html", meet=meet)
+# @app.route("/cubemeet/<int:meet_id>/results")
+# def meet_results(meet_id):
+#     meet = CubeMeet.query.get_or_404(meet_id)
+#     return render_template("cubemeet/results.html", meet=meet)
 
 
-@app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>")
-def round_detail(meet_id, event_id, round_number):
-    meet  = CubeMeet.query.get_or_404(meet_id)
-    event = Event.query.get_or_404(event_id)
-    solves = Solve.query.filter_by(event_id=event_id, round_number=round_number).all()
-    return render_template(
-        "round/round_detail.html",
-        meet=meet, event=event,
-        round_number=round_number,
-        solves=solves
-    )
+# @app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>")
+# def round_detail(meet_id, event_id, round_number):
+#     meet  = CubeMeet.query.get_or_404(meet_id)
+#     event = Event.query.get_or_404(event_id)
+#     solves = Solve.query.filter_by(event_id=event_id, round_number=round_number).all()
+#     return render_template(
+#         "round/round_detail.html",
+#         meet=meet, event=event,
+#         round_number=round_number,
+#         solves=solves
+#     )
 
-@app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>/save", methods=["POST"])
-def save_solves(meet_id, event_id, round_number):
-    return redirect(url_for("round_detail", meet_id=meet_id, event_id=event_id, round_number=round_number))
+# @app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>/save", methods=["POST"])
+# def save_solves(meet_id, event_id, round_number):
+#     return redirect(url_for("round_detail", meet_id=meet_id, event_id=event_id, round_number=round_number))
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
