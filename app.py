@@ -54,12 +54,34 @@ class CubeMeet(db.Model):
 class Event(db.Model):
     __tablename__ = 'events'
 
-    id          = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     cubemeet_id = db.Column(db.Integer, db.ForeignKey('cubemeets.id'), nullable=False)
-    name        = db.Column(db.String(50), nullable=False)   # e.g. "3x3x3 Cube"
-    rounds      = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    # rounds = db.Column(db.Integer, nullable=False)
 
-    # solves = db.relationship('Solve', backref='event', lazy=True, cascade='all, delete-orphan')
+    round_list = db.relationship(
+        'Round',
+        backref='event',
+        cascade='all, delete-orphan',
+        lazy=True
+    )
+
+
+class Round(db.Model):
+    __tablename__ = 'rounds'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
+
+    round_number = db.Column(db.Integer, nullable=False)
+
+    solves = db.relationship(
+        'Solve',
+        backref='round',
+        cascade='all, delete-orphan',
+        lazy=True
+    )
 
 
 class Competitor(db.Model):
@@ -79,13 +101,13 @@ class Solve(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
     competitor_id = db.Column(db.Integer, db.ForeignKey('competitors.id'), nullable=False)
 
-    round_number = db.Column(db.Integer, nullable=False)
+    round_id = db.Column(db.Integer, db.ForeignKey('rounds.id'), nullable=False)
 
-    attempt1 = db.Column(db.Float, nullable=True)
-    attempt2 = db.Column(db.Float, nullable=True)
-    attempt3 = db.Column(db.Float, nullable=True)
-    attempt4 = db.Column(db.Float, nullable=True)
-    attempt5 = db.Column(db.Float, nullable=True)
+    attempt1 = db.Column(db.Float)
+    attempt2 = db.Column(db.Float)
+    attempt3 = db.Column(db.Float)
+    attempt4 = db.Column(db.Float)
+    attempt5 = db.Column(db.Float)
 
     competitor = db.relationship('Competitor', backref='solves')
 
@@ -115,13 +137,21 @@ def create_meet():
         db.session.commit()
 
         # Create multiple events
-        for name, rounds in zip(event_names, rounds_list):
+        for name, rcount in zip(event_names, rounds_list):
             event = Event(
                 name=name,
-                rounds=int(rounds),
-                cubemeet_id=new_meet.id
+                cubemeet_id=new_meet.id  
             )
             db.session.add(event)
+            db.session.commit()  
+
+            # Create rounds
+            for i in range(int(rcount)):
+                new_round = Round(
+                    event_id=event.id,
+                    round_number=i + 1
+                )
+                db.session.add(new_round)
 
         db.session.commit()
 
@@ -139,17 +169,28 @@ def meet_detail(meet_id):
 def add_round(event_id):
     event = Event.query.get_or_404(event_id)
 
-    event.rounds += 1
+    new_round = Round(
+        event_id=event.id,
+        round_number=len(event.round_list) + 1
+    )
+
+    db.session.add(new_round)
     db.session.commit()
 
     return redirect(url_for('meet_detail', meet_id=event.cubemeet_id))
+
 
 @app.route("/event/<int:event_id>/remove_round", methods=["POST"])
 def remove_round(event_id):
     event = Event.query.get_or_404(event_id)
 
-    if event.rounds > 1:  # prevent going to 0 or negative
-        event.rounds -= 1
+    # get latest round
+    last_round = Round.query.filter_by(event_id=event.id)\
+        .order_by(Round.round_number.desc())\
+        .first()
+
+    if last_round:
+        db.session.delete(last_round)
         db.session.commit()
 
     return redirect(url_for('meet_detail', meet_id=event.cubemeet_id))
@@ -158,15 +199,23 @@ def remove_round(event_id):
 @app.route("/meet/<int:meet_id>/add_event", methods=["POST"])
 def add_event(meet_id):
     event_name = request.form.get('event_name')
-    rounds = request.form.get('rounds')
+    rounds_count = int(request.form.get('rounds'))
 
     new_event = Event(
         name=event_name,
-        rounds=int(rounds),
         cubemeet_id=meet_id
     )
 
     db.session.add(new_event)
+    db.session.commit()  
+
+    for i in range(rounds_count):
+        new_round = Round(
+            event_id=new_event.id,
+            round_number=i + 1
+        )
+        db.session.add(new_round)
+
     db.session.commit()
 
     return redirect(url_for('meet_detail', meet_id=meet_id))
@@ -223,21 +272,20 @@ app.jinja_env.globals.update(
 )
 
 
-@app.route("/event/<int:event_id>/round/<int:round_number>")
-def round_detail(event_id, round_number):
+@app.route("/round/<int:round_id>")
+def round_detail(round_id):
 
-    event = Event.query.get_or_404(event_id)
-    meet = CubeMeet.query.get_or_404(event.cubemeet_id)
+    round_obj = Round.query.get_or_404(round_id)
 
-    solves = Solve.query.filter_by(
-        event_id=event_id,
-        round_number=round_number
-    ).all()
+    event = round_obj.event
+    meet = event.cubemeet
+
+    solves = Solve.query.filter_by(round_id=round_id).all()
 
     solves = sorted(
         solves,
         key=lambda s: (
-            solve_stats(s)[0],   # number of solves
+            solve_stats(s)[0],
             -(solve_stats(s)[1] if solve_stats(s)[1] is not None else float("inf"))
         ),
         reverse=True
@@ -245,9 +293,9 @@ def round_detail(event_id, round_number):
 
     return render_template(
         "round_detail.html",
+        round_obj=round_obj,
         event=event,
         meet=meet,
-        round_number=round_number,
         solves=solves
     )
 
@@ -257,7 +305,12 @@ def add_solver(event_id, round_number):
 
     event = Event.query.get_or_404(event_id)
 
-    # default competitor name
+    # 🔥 FIND THE REAL ROUND OBJECT
+    round_obj = Round.query.filter_by(
+        event_id=event.id,
+        round_number=round_number
+    ).first_or_404()
+
     competitor = Competitor(
         name="New Solver",
         cubemeet_id=event.cubemeet_id
@@ -267,14 +320,14 @@ def add_solver(event_id, round_number):
 
     solve = Solve(
         event_id=event.id,
-        competitor_id=competitor.id,
-        round_number=round_number
+        round_id=round_obj.id,
+        competitor_id=competitor.id
     )
 
     db.session.add(solve)
     db.session.commit()
 
-    return redirect(url_for('round_detail', event_id=event.id, round_number=round_number))
+    return redirect(url_for('round_detail', round_id=round_obj.id))
 
 
 @app.route("/solve/<int:solve_id>/update", methods=["POST"])

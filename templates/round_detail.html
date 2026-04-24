@@ -1,11 +1,11 @@
 {% extends "base.html" %} {% block content %}
 
-<h3>{{ event.name }} - Round {{ round_number }}</h3>
+<h3>{{ event.name }} - Round {{ round_obj.round_number }}</h3>
 
 <!-- ✅ Add Solver Button -->
 <form
   method="POST"
-  action="{{ url_for('add_solver', event_id=event.id, round_number=round_number) }}"
+  action="{{ url_for('add_solver', event_id=event.id, round_number=round_obj.round_number) }}"
 >
   <button type="submit">Add Solver</button>
 </form>
