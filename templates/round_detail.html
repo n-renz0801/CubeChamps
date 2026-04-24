@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+
+<h3>{{ event.name }} - Round {{ round_number }}</h3>
+
+<hr />
+
+<!-- Add Solver Button (no function yet) -->
+<button>Add Solver</button>
+
+<br /><br />
+
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>Average</th>
+      <th>Best</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <!-- Placeholder rows -->
+    <tr>
+      <td>1</td>
+      <td>Sample Solver</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
+
+<a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
+  <button>Back to Meet</button>
+</a>
+
+{% endblock %}

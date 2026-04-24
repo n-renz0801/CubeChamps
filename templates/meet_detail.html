@@ -12,7 +12,9 @@
   <p><strong>{{ event.name }}</strong></p>
 
   {% for i in range(event.rounds) %}
-  <p>Round {{ i + 1 }}</p>
+  <a href="{{ url_for('round_detail', event_id=event.id, round_number=i+1) }}">
+    Round {{ i + 1 }} </a
+  ><br />
   {% endfor %}
 
   <!-- ➕ Add Round -->

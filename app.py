@@ -176,6 +176,19 @@ def delete_event(event_id):
     return redirect(url_for('meet_detail', meet_id=meet_id))
 
 
+@app.route("/event/<int:event_id>/round/<int:round_number>")
+def round_detail(event_id, round_number):
+    event = Event.query.get_or_404(event_id)
+    meet = CubeMeet.query.get_or_404(event.cubemeet_id)
+
+    return render_template(
+        "round_detail.html",
+        event=event,
+        meet=meet,
+        round_number=round_number
+    )
+
+
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(debug=True)
