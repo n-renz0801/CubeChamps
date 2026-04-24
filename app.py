@@ -26,7 +26,7 @@
 # │   └── images/
 
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -62,25 +62,32 @@ class Event(db.Model):
     # solves = db.relationship('Solve', backref='event', lazy=True, cascade='all, delete-orphan')
 
 
-# class Competitor(db.Model):
-#     __tablename__ = 'competitors'
+class Competitor(db.Model):
+    __tablename__ = 'competitors'
 
-#     id          = db.Column(db.Integer, primary_key=True)
-#     cubemeet_id = db.Column(db.Integer, db.ForeignKey('cubemeets.id'), nullable=False)
-#     name        = db.Column(db.String(100), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
 
-#     solves = db.relationship('Solve', backref='competitor', lazy=True, cascade='all, delete-orphan')
+    cubemeet_id = db.Column(db.Integer, db.ForeignKey('cubemeets.id'), nullable=False)
 
 
-# class Solve(db.Model):
-#     __tablename__ = 'solves'
+class Solve(db.Model):
+    __tablename__ = 'solves'
 
-#     id            = db.Column(db.Integer, primary_key=True)
-#     event_id      = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
-#     competitor_id = db.Column(db.Integer, db.ForeignKey('competitors.id'), nullable=False)
-#     round_number  = db.Column(db.Integer, nullable=False)
-#     time_ms       = db.Column(db.Integer, nullable=True)       # stored in milliseconds; NULL = not yet entered
-#     penalty       = db.Column(db.String(10), default='none')   # 'none' | '+2' | 'dnf'
+    id = db.Column(db.Integer, primary_key=True)
+
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
+    competitor_id = db.Column(db.Integer, db.ForeignKey('competitors.id'), nullable=False)
+
+    round_number = db.Column(db.Integer, nullable=False)
+
+    attempt1 = db.Column(db.Float, nullable=True)
+    attempt2 = db.Column(db.Float, nullable=True)
+    attempt3 = db.Column(db.Float, nullable=True)
+    attempt4 = db.Column(db.Float, nullable=True)
+    attempt5 = db.Column(db.Float, nullable=True)
+
+    competitor = db.relationship('Competitor', backref='solves')
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -176,17 +183,102 @@ def delete_event(event_id):
     return redirect(url_for('meet_detail', meet_id=meet_id))
 
 
+# ── helper functions ──
+def compute_average(times):
+    valid = [t for t in times if t is not None]
+
+    if len(valid) < 3:
+        return None
+
+    valid.sort()
+    middle = valid[1:-1]
+
+    return sum(middle) / len(middle)
+
+
+def compute_best(times):
+    valid = [t for t in times if t is not None]
+    return min(valid) if valid else None
+
+
+app.jinja_env.globals.update(
+    compute_average=compute_average,
+    compute_best=compute_best
+)
+
+
 @app.route("/event/<int:event_id>/round/<int:round_number>")
 def round_detail(event_id, round_number):
+
     event = Event.query.get_or_404(event_id)
     meet = CubeMeet.query.get_or_404(event.cubemeet_id)
+
+    solves = Solve.query.filter_by(
+        event_id=event_id,
+        round_number=round_number
+    ).all()
 
     return render_template(
         "round_detail.html",
         event=event,
         meet=meet,
+        round_number=round_number,
+        solves=solves
+    )
+
+
+@app.route("/event/<int:event_id>/round/<int:round_number>/add_solver", methods=["POST"])
+def add_solver(event_id, round_number):
+
+    event = Event.query.get_or_404(event_id)
+
+    # default competitor name
+    competitor = Competitor(
+        name="New Solver",
+        cubemeet_id=event.cubemeet_id
+    )
+    db.session.add(competitor)
+    db.session.commit()
+
+    solve = Solve(
+        event_id=event.id,
+        competitor_id=competitor.id,
         round_number=round_number
     )
+
+    db.session.add(solve)
+    db.session.commit()
+
+    return redirect(url_for('round_detail', event_id=event.id, round_number=round_number))
+
+
+@app.route("/solve/<int:solve_id>/update", methods=["POST"])
+def update_solve(solve_id):
+
+    solve = Solve.query.get_or_404(solve_id)
+    data = request.get_json()
+
+    solve.attempt1 = data.get("attempt1")
+    solve.attempt2 = data.get("attempt2")
+    solve.attempt3 = data.get("attempt3")
+    solve.attempt4 = data.get("attempt4")
+    solve.attempt5 = data.get("attempt5")
+
+    db.session.commit()
+
+    # recompute
+    times = [
+        solve.attempt1,
+        solve.attempt2,
+        solve.attempt3,
+        solve.attempt4,
+        solve.attempt5
+    ]
+
+    return jsonify({
+        "average": compute_average(times),
+        "best": compute_best(times)
+    })
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────

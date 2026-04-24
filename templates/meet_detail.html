@@ -3,12 +3,10 @@
 <h3>{{ meet.name }}</h3>
 <p>Date: {{ meet.date }}</p>
 
-<hr />
-
 <h4>Events</h4>
 
 {% for event in meet.events %}
-<div style="border: 1px solid black; padding: 10px; margin-bottom: 10px">
+<div>
   <p><strong>{{ event.name }}</strong></p>
 
   {% for i in range(event.rounds) %}
@@ -17,30 +15,18 @@
   ><br />
   {% endfor %}
 
-  <!-- ➕ Add Round -->
-  <form
-    method="POST"
-    action="{{ url_for('add_round', event_id=event.id) }}"
-    style="display: inline"
-  >
+  <!-- Add Round -->
+  <form method="POST" action="{{ url_for('add_round', event_id=event.id) }}">
     <button type="submit">+ Round</button>
   </form>
 
-  <!-- ➖ Remove Round -->
-  <form
-    method="POST"
-    action="{{ url_for('remove_round', event_id=event.id) }}"
-    style="display: inline"
-  >
+  <!-- Remove Round -->
+  <form method="POST" action="{{ url_for('remove_round', event_id=event.id) }}">
     <button type="submit">- Round</button>
   </form>
 
-  <!-- ❌ Delete Event -->
-  <form
-    method="POST"
-    action="{{ url_for('delete_event', event_id=event.id) }}"
-    style="display: inline"
-  >
+  <!-- Delete Event -->
+  <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
     <button type="submit">Delete Event</button>
   </form>
 </div>
@@ -48,8 +34,6 @@
 {% else %}
 <p>No events yet</p>
 {% endfor %}
-
-<hr />
 
 <h4>Add New Event</h4>
 
@@ -72,8 +56,6 @@
 
   <button type="submit">Add Event</button>
 </form>
-
-<br />
 
 <a href="{{ url_for('home') }}">
   <button>Back to Home</button>

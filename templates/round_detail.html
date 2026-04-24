@@ -2,14 +2,17 @@
 
 <h3>{{ event.name }} - Round {{ round_number }}</h3>
 
-<hr />
-
-<!-- Add Solver Button (no function yet) -->
-<button>Add Solver</button>
+<!-- ✅ Add Solver Button -->
+<form
+  method="POST"
+  action="{{ url_for('add_solver', event_id=event.id, round_number=round_number) }}"
+>
+  <button type="submit">Add Solver</button>
+</form>
 
 <br /><br />
 
-<table border="1" cellpadding="5">
+<table>
   <thead>
     <tr>
       <th>#</th>
@@ -25,25 +28,108 @@
   </thead>
 
   <tbody>
-    <!-- Placeholder rows -->
-    <tr>
-      <td>1</td>
-      <td>Sample Solver</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
+    {% for solve in solves %}
+    <tr data-solve-id="{{ solve.id }}">
+      <td>{{ loop.index }}</td>
+
+      <!-- Competitor Name -->
+      <td>
+        <input type="text" value="{{ solve.competitor.name }}" />
+      </td>
+
+      <!-- Attempts -->
+      <td>
+        <input
+          class="solve-input"
+          data-field="attempt1"
+          value="{{ solve.attempt1 or '' }}"
+        />
+      </td>
+      <td>
+        <input
+          class="solve-input"
+          data-field="attempt2"
+          value="{{ solve.attempt2 or '' }}"
+        />
+      </td>
+      <td>
+        <input
+          class="solve-input"
+          data-field="attempt3"
+          value="{{ solve.attempt3 or '' }}"
+        />
+      </td>
+      <td>
+        <input
+          class="solve-input"
+          data-field="attempt4"
+          value="{{ solve.attempt4 or '' }}"
+        />
+      </td>
+      <td>
+        <input
+          class="solve-input"
+          data-field="attempt5"
+          value="{{ solve.attempt5 or '' }}"
+        />
+      </td>
+
+      {% set times = [ solve.attempt1, solve.attempt2, solve.attempt3,
+      solve.attempt4, solve.attempt5 ] %}
+
+      <!-- Computed values -->
+      <td class="avg-cell">{{ compute_average(times) or "-" }}</td>
+      <td class="best-cell">{{ compute_best(times) or "-" }}</td>
     </tr>
+    {% endfor %}
   </tbody>
 </table>
 
 <br />
 
+<!-- Back Button -->
 <a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
-  <button>Back to Meet</button>
+  <button type="button">Back to Meet</button>
 </a>
+
+<script>
+  let timeout = null;
+
+  document.querySelectorAll(".solve-input").forEach((input) => {
+    input.addEventListener("input", function () {
+      const row = this.closest("tr");
+      const solveId = row.dataset.solveId;
+
+      clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
+        const data = {
+          attempt1: row.querySelector('[data-field="attempt1"]').value || null,
+          attempt2: row.querySelector('[data-field="attempt2"]').value || null,
+          attempt3: row.querySelector('[data-field="attempt3"]').value || null,
+          attempt4: row.querySelector('[data-field="attempt4"]').value || null,
+          attempt5: row.querySelector('[data-field="attempt5"]').value || null,
+        };
+
+        fetch(`/solve/${solveId}/update`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            // 🔥 UPDATE UI IMMEDIATELY
+            row.querySelector(".avg-cell").innerText =
+              result.average !== null ? result.average : "-";
+
+            row.querySelector(".best-cell").innerText =
+              result.best !== null ? result.best : "-";
+          });
+      }, 400);
+    });
+  });
+</script>
 
 {% endblock %}
