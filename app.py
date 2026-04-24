@@ -128,32 +128,52 @@ def meet_detail(meet_id):
     meet = CubeMeet.query.get_or_404(meet_id)
     return render_template("meet_detail.html", meet=meet)
 
-# @app.route("/cubemeet/<int:meet_id>/competitors")
-# def meet_competitors(meet_id):
-#     meet = CubeMeet.query.get_or_404(meet_id)
-#     return render_template("cubemeet/competitors.html", meet=meet)
+@app.route("/event/<int:event_id>/add_round", methods=["POST"])
+def add_round(event_id):
+    event = Event.query.get_or_404(event_id)
 
-# @app.route("/cubemeet/<int:meet_id>/results")
-# def meet_results(meet_id):
-#     meet = CubeMeet.query.get_or_404(meet_id)
-#     return render_template("cubemeet/results.html", meet=meet)
+    event.rounds += 1
+    db.session.commit()
+
+    return redirect(url_for('meet_detail', meet_id=event.cubemeet_id))
+
+@app.route("/event/<int:event_id>/remove_round", methods=["POST"])
+def remove_round(event_id):
+    event = Event.query.get_or_404(event_id)
+
+    if event.rounds > 1:  # prevent going to 0 or negative
+        event.rounds -= 1
+        db.session.commit()
+
+    return redirect(url_for('meet_detail', meet_id=event.cubemeet_id))
 
 
-# @app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>")
-# def round_detail(meet_id, event_id, round_number):
-#     meet  = CubeMeet.query.get_or_404(meet_id)
-#     event = Event.query.get_or_404(event_id)
-#     solves = Solve.query.filter_by(event_id=event_id, round_number=round_number).all()
-#     return render_template(
-#         "round/round_detail.html",
-#         meet=meet, event=event,
-#         round_number=round_number,
-#         solves=solves
-#     )
+@app.route("/meet/<int:meet_id>/add_event", methods=["POST"])
+def add_event(meet_id):
+    event_name = request.form.get('event_name')
+    rounds = request.form.get('rounds')
 
-# @app.route("/cubemeet/<int:meet_id>/event/<int:event_id>/round/<int:round_number>/save", methods=["POST"])
-# def save_solves(meet_id, event_id, round_number):
-#     return redirect(url_for("round_detail", meet_id=meet_id, event_id=event_id, round_number=round_number))
+    new_event = Event(
+        name=event_name,
+        rounds=int(rounds),
+        cubemeet_id=meet_id
+    )
+
+    db.session.add(new_event)
+    db.session.commit()
+
+    return redirect(url_for('meet_detail', meet_id=meet_id))
+
+
+@app.route("/event/<int:event_id>/delete", methods=["POST"])
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    meet_id = event.cubemeet_id
+
+    db.session.delete(event)
+    db.session.commit()
+
+    return redirect(url_for('meet_detail', meet_id=meet_id))
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
