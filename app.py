@@ -336,7 +336,20 @@ def update_solve(solve_id):
     solve = Solve.query.get_or_404(solve_id)
     data = request.get_json()
 
-    solve.competitor.name = data.get("name")
+    name = data.get("name", "").strip()
+
+    # 🚨 DELETE ONLY THE SOLVE (NOT COMPETITOR)
+    if name == "":
+        db.session.delete(solve)
+        db.session.commit()
+
+        return jsonify({
+            "deleted": True,
+            "solve_id": solve_id
+        })
+
+    # ✅ NORMAL UPDATE
+    solve.competitor.name = name
 
     solve.attempt1 = data.get("attempt1")
     solve.attempt2 = data.get("attempt2")
@@ -357,8 +370,26 @@ def update_solve(solve_id):
     return jsonify({
         "average": compute_average(times),
         "best": compute_best(times),
-        "solve_id": solve.id
+        "solve_id": solve.id,
+        "deleted": False
     })
+
+
+@app.route("/solve/<int:solve_id>/delete", methods=["POST"])
+def delete_solve(solve_id):
+    solve = Solve.query.get_or_404(solve_id)
+
+    competitor = solve.competitor
+
+    db.session.delete(solve)
+    db.session.commit()
+
+    # delete competitor ONLY if no more solves
+    if not Solve.query.filter_by(competitor_id=competitor.id).first():
+        db.session.delete(competitor)
+        db.session.commit()
+
+    return '', 204
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
