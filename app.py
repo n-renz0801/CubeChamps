@@ -201,6 +201,22 @@ def compute_best(times):
     return min(valid) if valid else None
 
 
+def solve_stats(solve):
+    times = [
+        solve.attempt1,
+        solve.attempt2,
+        solve.attempt3,
+        solve.attempt4,
+        solve.attempt5
+    ]
+
+    valid = [t for t in times if t is not None]
+
+    avg = compute_average(times)  
+
+    return len(valid), avg
+
+
 app.jinja_env.globals.update(
     compute_average=compute_average,
     compute_best=compute_best
@@ -217,6 +233,15 @@ def round_detail(event_id, round_number):
         event_id=event_id,
         round_number=round_number
     ).all()
+
+    solves = sorted(
+        solves,
+        key=lambda s: (
+            solve_stats(s)[0],   # number of solves
+            -(solve_stats(s)[1] if solve_stats(s)[1] is not None else float("inf"))
+        ),
+        reverse=True
+    )
 
     return render_template(
         "round_detail.html",
@@ -258,6 +283,8 @@ def update_solve(solve_id):
     solve = Solve.query.get_or_404(solve_id)
     data = request.get_json()
 
+    solve.competitor.name = data.get("name")
+
     solve.attempt1 = data.get("attempt1")
     solve.attempt2 = data.get("attempt2")
     solve.attempt3 = data.get("attempt3")
@@ -266,7 +293,6 @@ def update_solve(solve_id):
 
     db.session.commit()
 
-    # recompute
     times = [
         solve.attempt1,
         solve.attempt2,
@@ -277,7 +303,8 @@ def update_solve(solve_id):
 
     return jsonify({
         "average": compute_average(times),
-        "best": compute_best(times)
+        "best": compute_best(times),
+        "solve_id": solve.id
     })
 
 

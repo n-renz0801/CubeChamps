@@ -27,14 +27,19 @@
     </tr>
   </thead>
 
-  <tbody>
+  <tbody id="solves-body">
     {% for solve in solves %}
     <tr data-solve-id="{{ solve.id }}">
-      <td>{{ loop.index }}</td>
+      <td class="rank-cell"></td>
 
       <!-- Competitor Name -->
       <td>
-        <input type="text" value="{{ solve.competitor.name }}" />
+        <input
+          class="solve-input"
+          data-field="name"
+          type="text"
+          value="{{ solve.competitor.name }}"
+        />
       </td>
 
       <!-- Attempts -->
@@ -93,42 +98,122 @@
 </a>
 
 <script>
-  let timeout = null;
+  /* =========================
+   UPDATE RANK NUMBERS
+========================= */
+  function updateRanks() {
+    const tbody = document.getElementById("solves-body");
+    const rows = tbody.querySelectorAll("tr");
 
+    rows.forEach((row, index) => {
+      const rankCell = row.querySelector(".rank-cell");
+      if (rankCell) {
+        rankCell.innerText = index + 1;
+      }
+    });
+  }
+
+  /* =========================
+   REORDER TABLE (LEADERBOARD LOGIC)
+========================= */
+  function reorderTable() {
+    const tbody = document.getElementById("solves-body");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    function getStats(row) {
+      const inputs = row.querySelectorAll("input[data-field]");
+      const times = [];
+
+      inputs.forEach((inp) => {
+        const field = inp.dataset.field;
+
+        if (field.startsWith("attempt")) {
+          const val = parseFloat(inp.value);
+          if (!isNaN(val)) times.push(val);
+        }
+      });
+
+      const validCount = times.length;
+
+      let avg = null;
+      if (times.length >= 3) {
+        const sorted = [...times].sort((a, b) => a - b);
+        const middle = sorted.slice(1, -1);
+        avg = middle.reduce((a, b) => a + b, 0) / middle.length;
+      }
+
+      return { validCount, avg };
+    }
+
+    rows.sort((a, b) => {
+      const A = getStats(a);
+      const B = getStats(b);
+
+      // 1st priority: more solves
+      if (B.validCount !== A.validCount) {
+        return B.validCount - A.validCount;
+      }
+
+      // 2nd priority: lower average wins
+      if (A.avg === null && B.avg === null) return 0;
+      if (A.avg === null) return 1;
+      if (B.avg === null) return -1;
+
+      return A.avg - B.avg;
+    });
+
+    // reattach rows in new order
+    rows.forEach((row) => tbody.appendChild(row));
+
+    // update ranking numbers
+    updateRanks();
+  }
+
+  /* =========================
+   AUTO SAVE ON BLUR (FIXED UX)
+========================= */
   document.querySelectorAll(".solve-input").forEach((input) => {
-    input.addEventListener("input", function () {
+    input.addEventListener("blur", function () {
       const row = this.closest("tr");
       const solveId = row.dataset.solveId;
 
-      clearTimeout(timeout);
+      const data = {
+        name: row.querySelector('[data-field="name"]').value || "",
 
-      timeout = setTimeout(() => {
-        const data = {
-          attempt1: row.querySelector('[data-field="attempt1"]').value || null,
-          attempt2: row.querySelector('[data-field="attempt2"]').value || null,
-          attempt3: row.querySelector('[data-field="attempt3"]').value || null,
-          attempt4: row.querySelector('[data-field="attempt4"]').value || null,
-          attempt5: row.querySelector('[data-field="attempt5"]').value || null,
-        };
+        attempt1: row.querySelector('[data-field="attempt1"]').value || null,
+        attempt2: row.querySelector('[data-field="attempt2"]').value || null,
+        attempt3: row.querySelector('[data-field="attempt3"]').value || null,
+        attempt4: row.querySelector('[data-field="attempt4"]').value || null,
+        attempt5: row.querySelector('[data-field="attempt5"]').value || null,
+      };
 
-        fetch(`/solve/${solveId}/update`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        })
-          .then((res) => res.json())
-          .then((result) => {
-            // 🔥 UPDATE UI IMMEDIATELY
-            row.querySelector(".avg-cell").innerText =
-              result.average !== null ? result.average : "-";
+      fetch(`/solve/${solveId}/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          // update UI instantly
+          row.querySelector(".avg-cell").innerText =
+            result.average !== null ? result.average : "-";
 
-            row.querySelector(".best-cell").innerText =
-              result.best !== null ? result.best : "-";
-          });
-      }, 400);
+          row.querySelector(".best-cell").innerText =
+            result.best !== null ? result.best : "-";
+
+          // reorder leaderboard
+          reorderTable();
+        });
     });
+  });
+
+  /* =========================
+   INITIAL LOAD FIX
+========================= */
+  window.addEventListener("DOMContentLoaded", () => {
+    reorderTable();
   });
 </script>
 
