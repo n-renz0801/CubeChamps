@@ -118,7 +118,7 @@ def create_meet():
 
         db.session.commit()
 
-        return redirect(url_for('home'))
+        return redirect(url_for('meet_detail', meet_id=new_meet.id))
 
     return render_template('create_meet.html')
 
