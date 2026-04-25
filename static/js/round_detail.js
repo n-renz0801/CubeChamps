@@ -13,6 +13,36 @@ function updateRanks() {
 }
 
 /* =========================
+   FORMATTERS
+========================= */
+function formatTimeDisplay(value) {
+  if (value === null || value === undefined || value === "") return "";
+
+  value = value.toString().trim().toUpperCase();
+
+  if (value === "DNF" || value === "DNS") return value;
+
+  const plus2 = value.match(/^(\d+(\.\d+)?)\+2$/);
+  if (plus2) {
+    const num = parseFloat(plus2[1]);
+    return num.toFixed(2) + "+2";
+  }
+
+  const num = parseFloat(value);
+  if (!isNaN(num)) return num.toFixed(2);
+
+  return value;
+}
+
+function formatResult(value) {
+  if (value === null || value === undefined) return "-";
+  if (value === "DNF") return "DNF";
+
+  const num = parseFloat(value);
+  return isNaN(num) ? "-" : num.toFixed(2);
+}
+
+/* =========================
    VALIDATION
 ========================= */
 function isValidTime(value) {
@@ -22,7 +52,7 @@ function isValidTime(value) {
 
   if (value === "DNF" || value === "DNS") return true;
   if (/^\d+(\.\d+)?\+2$/.test(value)) return true;
-  if (/^\d+(\.\d+)?$/.test(value)) return true; // plain numbers only
+  if (/^\d+(\.\d+)?$/.test(value)) return true;
 
   return false;
 }
@@ -86,20 +116,15 @@ function getStats(row) {
 
   let avg = null;
 
-  // 2+ DNF/DNS → automatic DNF
   if (specialCount >= 2) {
     avg = "DNF";
   } else if (times.length >= 3) {
     const sorted = [...times].sort((a, b) => a - b);
 
-    // KEY FIX: if 1 DNF/DNS exists, it already occupies the worst slot —
-    // only remove the best numeric solve, not both ends
     const middle = specialCount === 1 ? sorted.slice(1) : sorted.slice(1, -1);
 
     if (middle.length > 0) {
       avg = middle.reduce((a, b) => a + b, 0) / middle.length;
-    } else {
-      avg = null;
     }
   }
 
@@ -120,16 +145,13 @@ function reorderTable() {
     const A = getStats(a);
     const B = getStats(b);
 
-    // more solves first
     if (B.validCount !== A.validCount) {
       return B.validCount - A.validCount;
     }
 
-    // DNF worst
     if (A.avg === "DNF" && B.avg !== "DNF") return 1;
     if (B.avg === "DNF" && A.avg !== "DNF") return -1;
 
-    // null handling
     if (A.avg === null && B.avg === null) return 0;
     if (A.avg === null) return 1;
     if (B.avg === null) return -1;
@@ -208,6 +230,9 @@ document.querySelectorAll(".solve-input").forEach((input) => {
       }
 
       inp.dataset.lastValid = inp.value;
+
+      // 🔥 FORMAT INPUT HERE
+      inp.value = formatTimeDisplay(inp.value);
     }
 
     /* CLEAN DATA */
@@ -229,11 +254,9 @@ document.querySelectorAll(".solve-input").forEach((input) => {
     })
       .then((res) => res.json())
       .then((result) => {
-        row.querySelector(".avg-cell").innerText =
-          result.average === null ? "-" : result.average;
+        row.querySelector(".avg-cell").innerText = formatResult(result.average);
 
-        row.querySelector(".best-cell").innerText =
-          result.best !== null ? result.best : "-";
+        row.querySelector(".best-cell").innerText = formatResult(result.best);
 
         reorderTable();
       });
