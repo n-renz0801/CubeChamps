@@ -1,64 +1,126 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/meet_detail.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h3>{{ meet.name }}</h3>
-<p>Date: {{ meet.date }}</p>
+<div class="meet-detail-wrapper">
+  <h2 class="meet-title">{{ meet.name }}</h2>
 
-<h4>Events</h4>
+  <!-- ── Event Tiles ── -->
+  <div class="events-scroll-area">
+    {% for event in meet.events %}{% set icons = { '3x3x3 Cube': 'event-333',
+    '2x2x2 Cube': 'event-222', '4x4x4 Cube': 'event-444', '5x5x5 Cube':
+    'event-555', '6x6x6 Cube': 'event-666', '7x7x7 Cube': 'event-777', '3x3x3
+    Blindfolded': 'event-333bf', '3x3x3 Fewest Moves': 'event-333fm', '3x3x3
+    One-Handed': 'event-333oh', 'Clock': 'event-clock', 'Megaminx':
+    'event-minx', 'Pyraminx': 'event-pyram', 'Skewb': 'event-skewb', 'Square-1':
+    'event-sq1', '4x4x4 Blindfolded': 'event-444bf', '5x5x5 Blindfolded':
+    'event-555bf', '3x3x3 Multi-Blind': 'event-333mbf' } %}
 
-{% for event in meet.events %}
-<div>
-  <p><strong>{{ event.name }}</strong></p>
+    <div class="event-tile">
+      <div class="tile-header">
+        <div class="tile-icon">
+          <span
+            class="cubing-icon {{ icons.get(event.name, 'event-333') }}"
+          ></span>
+        </div>
+        <span class="tile-event-name">{{ event.name }}</span>
+      </div>
 
-  {% for round in event.round_list %}
-  <a href="{{ url_for('round_detail', round_id=round.id) }}">
-    Round {{ round.round_number }}
-  </a>
-  {% endfor %}
+      <div class="tile-divider"></div>
 
-  <!-- Add Round -->
-  <form method="POST" action="{{ url_for('add_round', event_id=event.id) }}">
-    <button type="submit">+ Round</button>
-  </form>
+      <div class="tile-rounds">
+        {% for round in event.round_list %}
+        <a href="{{ url_for('round_detail', round_id=round.id) }}">
+          <span class="round-dot"></span>
+          Round {{ round.round_number }}
+        </a>
+        {% else %}
+        <span class="no-rounds">No rounds yet</span>
+        {% endfor %}
+      </div>
 
-  <!-- Remove Round -->
-  <form method="POST" action="{{ url_for('remove_round', event_id=event.id) }}">
-    <button type="submit">- Round</button>
-  </form>
+      <div class="tile-divider"></div>
 
-  <!-- Delete Event -->
-  <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
-    <button type="submit">Delete Event</button>
+      <div class="tile-actions">
+        <form
+          method="POST"
+          action="{{ url_for('add_round', event_id=event.id) }}"
+          style="flex: 1; display: flex"
+        >
+          <button type="submit" class="tile-btn" title="Add Round">
+            <ion-icon name="add"></ion-icon>
+          </button>
+        </form>
+
+        <form
+          method="POST"
+          action="{{ url_for('remove_round', event_id=event.id) }}"
+          style="flex: 1; display: flex"
+        >
+          <button type="submit" class="tile-btn" title="Remove Round">
+            <ion-icon name="remove"></ion-icon>
+          </button>
+        </form>
+
+        <form
+          method="POST"
+          action="{{ url_for('delete_event', event_id=event.id) }}"
+          style="flex: 1; display: flex"
+          onsubmit="return confirm('Delete {{ event.name }}?')"
+        >
+          <button type="submit" class="tile-btn delete" title="Delete Event">
+            <ion-icon name="trash-bin"></ion-icon>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% else %}
+    <p class="no-events-msg">No events yet — add one below.</p>
+    {% endfor %}
+  </div>
+
+  <!-- ── Add New Event (sticky bottom) ── -->
+  <form
+    method="POST"
+    action="{{ url_for('add_event', meet_id=meet.id) }}"
+    class="add-event-bar"
+  >
+    <label>Event</label>
+    <select name="event_name">
+      <option value="3x3x3 Cube">3x3x3 Cube</option>
+      <option value="2x2x2 Cube">2x2x2 Cube</option>
+      <option value="4x4x4 Cube">4x4x4 Cube</option>
+      <option value="5x5x5 Cube">5x5x5 Cube</option>
+      <option value="6x6x6 Cube">6x6x6 Cube</option>
+      <option value="7x7x7 Cube">7x7x7 Cube</option>
+
+      <option value="3x3x3 One-Handed">3x3x3 One-Handed</option>
+      <option value="Clock">Clock</option>
+      <option value="Megaminx">Megaminx</option>
+      <option value="Pyraminx">Pyraminx</option>
+      <option value="Skewb">Skewb</option>
+      <option value="Square-1">Square-1</option>
+
+      <option value="3x3x3 Fewest Moves">3x3x3 Fewest Moves</option>
+
+      <option value="3x3x3 Blindfolded">3x3x3 Blindfolded</option>
+      <option value="4x4x4 Blindfolded">4x4x4 Blindfolded</option>
+      <option value="5x5x5 Blindfolded">5x5x5 Blindfolded</option>
+
+      <option value="3x3x3 Multi-Blind">3x3x3 Multi-Blind</option>
+    </select>
+
+    <label>Rounds</label>
+    <input type="number" name="rounds" min="1" value="1" />
+
+    <button type="submit">+ Add Event</button>
   </form>
 </div>
 
-{% else %}
-<p>No events yet</p>
-{% endfor %}
-
-<h4>Add New Event</h4>
-
-<form method="POST" action="{{ url_for('add_event', meet_id=meet.id) }}">
-  <label>Event:</label>
-  <select name="event_name">
-    <option value="3x3">3x3</option>
-    <option value="2x2">2x2</option>
-    <option value="4x4">4x4</option>
-    <option value="5x5">5x5</option>
-    <option value="6x6">6x6</option>
-    <option value="7x7">7x7</option>
-    <option value="Pyraminx">Pyraminx</option>
-    <option value="Megaminx">Megaminx</option>
-    <option value="Skewb">Skewb</option>
-  </select>
-
-  <label>Rounds:</label>
-  <input type="number" name="rounds" min="1" value="1" />
-
-  <button type="submit">Add Event</button>
-</form>
-
-<!-- <a href="{{ url_for('home') }}">
-  <button>Back to Home</button>
-</a> -->
+<script src="{{ url_for('static', filename='js/meet_detail.js') }}"></script>
 
 {% endblock %}

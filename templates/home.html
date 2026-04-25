@@ -1,25 +1,53 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/home.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h3>All Meets</h3>
-<a href="{{ url_for('global_persons') }}">
-  <button type="button">All Persons</button>
-</a>
-<ul>
-  {% for meet in meets %}
-  <li>
-    <a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
-      {{ meet.name }} - {{ meet.date }}
+<div class="home-wrapper">
+  <!-- ── Header ── -->
+  <div class="home-header">
+    <div class="home-header-text">
+      <span class="home-title">CubeChamps</span>
+      <span class="home-subtitle">Competition Manager</span>
+    </div>
+    <a href="{{ url_for('global_persons') }}" class="all-persons-btn">
+      <ion-icon name="people-outline"></ion-icon>
+      All Persons
     </a>
-  </li>
-  {% else %}
-  <li>No meets yet</li>
-  {% endfor %}
-</ul>
+  </div>
 
-<br />
+  <!-- ── Meets List ── -->
+  <div class="home-content">
+    <span class="section-label">All Meets</span>
 
-<a href="{{ url_for('create_meet') }}">
-  <button>Create Meet</button>
-</a>
+    {% if meets %}
+    <div class="meets-card">
+      {% for meet in meets %}
+      <a href="{{ url_for('meet_detail', meet_id=meet.id) }}" class="meet-row">
+        <div class="meet-avatar">{{ meet.name[0].upper() }}</div>
+        <div class="meet-info">
+          <span class="meet-name">{{ meet.name }}</span>
+          <span class="meet-date">{{ meet.date }}</span>
+        </div>
+        <ion-icon name="chevron-forward" class="meet-chevron"></ion-icon>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <p class="no-data-msg">No meets yet — create one below.</p>
+    {% endif %}
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="home-footer">
+    <a href="{{ url_for('create_meet') }}" class="create-meet-btn">
+      <ion-icon name="add"></ion-icon>
+      Create Meet
+    </a>
+  </div>
+</div>
 
 {% endblock %}

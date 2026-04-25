@@ -1,0 +1,210 @@
+/* ── Layout ── */
+.podiums-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 10% 3rem;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.podiums-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 1.2rem 1.5rem 1rem;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.podiums-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 100%;
+  border-radius: 8px;
+  background: #24252a;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.podiums-back-btn:hover {
+  opacity: 0.9;
+}
+
+.podiums-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.podiums-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.podiums-subtitle {
+  font-size: 0.9rem;
+  color: #7b7b7b;
+  letter-spacing: 0.03em;
+}
+
+/* ── Content ── */
+.podiums-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 1.5rem;
+  margin: 0.5rem 0 1.2rem;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.podiums-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.podiums-content::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+/* ── Event Section ── */
+.event-section {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.8rem;
+  box-shadow: 0 0.4rem 0.8rem #0005;
+  overflow: hidden;
+}
+
+.event-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.9rem 1.2rem;
+  background: #24252a;
+  border-bottom: none;
+}
+
+.event-section-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.event-section-header .cubing-icon {
+  font-size: 1.4rem;
+  filter: invert(1);
+}
+
+/* ── Table ── */
+.podium-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.podium-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  white-space: nowrap;
+  border-bottom: 1.5px solid #f0f0f0;
+  background: #fff;
+}
+
+.podium-table th:first-child {
+  text-align: center;
+  width: 48px;
+}
+
+.podium-table th:nth-child(n + 3) {
+  text-align: right;
+}
+
+.podium-table tbody tr {
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.1s;
+}
+
+.podium-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.podium-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.podium-table td {
+  padding: 12px 12px;
+  color: #222;
+  vertical-align: middle;
+}
+
+/* ── Rank Cell ── */
+.rank-cell {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.rank-1 .rank-cell {
+  color: #b8860b;
+}
+.rank-2 .rank-cell {
+  color: #808080;
+}
+.rank-3 .rank-cell {
+  color: #8b4513;
+}
+
+/* ── Name Cell ── */
+.name-cell {
+  font-weight: 600;
+  color: #111;
+}
+
+/* ── Time Cells ── */
+.time-cell {
+  text-align: right;
+  color: #555;
+}
+
+/* ── Avg / Best ── */
+.avg-cell {
+  text-align: right;
+  font-weight: 600;
+  color: #111;
+}
+
+.best-cell {
+  text-align: right;
+  font-weight: 600;
+  color: #e67e00;
+}
+
+/* ── Fallback ── */
+.no-solves-msg {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-style: italic;
+  padding: 1rem 1.2rem;
+  background: #fff;
+}

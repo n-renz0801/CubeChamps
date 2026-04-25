@@ -1,0 +1,245 @@
+/* ── Layout ── */
+.round-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 10% 3rem;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.round-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 1.2rem 1.5rem 1rem;
+  height: 80px;
+  /* border-bottom: 1.5px solid #e8e8e8; */
+  flex-shrink: 0;
+}
+
+.round-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 100%;
+  border-radius: 8px;
+  background: #24252a;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+}
+
+.round-back-btn:hover {
+  opacity: 0.9;
+}
+
+.round-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.round-event-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.round-subtitle {
+  font-size: 0.9rem;
+  color: #7b7b7b;
+  letter-spacing: 0.03em;
+}
+
+/* ── Table Area ── */
+.round-table-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 0 1.5rem;
+  margin: 0.5rem 0 1.2rem;
+  scrollbar-width: thin;
+  backdrop-filter: blur(7px);
+  box-shadow: 0 0.4rem 0.8rem #0005;
+  border-radius: 0.8rem;
+}
+
+.round-table-area::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.round-table-area::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.solves-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  min-width: 600px;
+}
+
+.solves-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+}
+
+.solves-table thead tr {
+  border-bottom: 2px solid #111;
+}
+
+.solves-table th {
+  padding: 15px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #111;
+  white-space: nowrap;
+}
+
+.solves-table th:first-child {
+  text-align: center;
+}
+
+.solves-table th:nth-child(n + 3):nth-child(-n + 9) {
+  text-align: right;
+}
+
+.solves-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.1s;
+}
+
+.solves-table tbody tr:hover {
+  background: #f0f0f0;
+}
+
+.solves-table td {
+  padding: 6px 8px;
+  color: #222;
+  vertical-align: middle;
+}
+
+/* Rank cell */
+.rank-cell {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #aaa;
+  width: 36px;
+}
+
+/* Avg / Best cells */
+.avg-cell,
+.best-cell {
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+}
+
+.best-cell {
+  color: #e67e00;
+}
+
+/* ── Inputs ── */
+.solve-input {
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 1rem;
+  color: #222;
+  width: 100%;
+  min-width: 50px;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  outline: none;
+  text-align: right;
+}
+
+.solve-input:hover {
+  border-color: #e0e0e0;
+  background: #f9f9f9;
+}
+
+.solve-input:focus {
+  border-color: #111;
+  background: #fff;
+}
+
+input[data-field="name"].solve-input {
+  min-width: 120px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.solves-table td:nth-child(n + 3):nth-child(-n + 9) {
+  text-align: right;
+}
+
+.solve-input:placeholder-shown {
+  border-color: #aaa; /* or any color you want */
+}
+
+/* ── Footer ── */
+.round-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 1.5rem 16px;
+  /* border-top: 1.5px solid #e8e8e8; */
+  flex-shrink: 0;
+}
+
+.add-solver-btn {
+  background: #467750;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-solver-btn .btn-icon {
+  color: white;
+}
+
+.add-solver-btn:hover {
+  opacity: 0.9;
+}
+
+.solver-count {
+  font-size: 0.78rem;
+  color: #aaa;
+  letter-spacing: 0.02em;
+}
+
+#solves-body tr:nth-child(1) td:first-child,
+#solves-body tr:nth-child(2) td:first-child,
+#solves-body tr:nth-child(3) td:first-child {
+  background-color: #89c07e;
+}

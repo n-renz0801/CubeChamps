@@ -1,102 +1,183 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/create_meet.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h3>Create New Meet</h3>
+<div class="create-meet-wrapper">
+  <!-- ── Header ── -->
+  <div class="create-meet-header">
+    <a href="{{ url_for('home') }}" class="create-meet-back-btn" title="Cancel">
+      <ion-icon name="arrow-back"></ion-icon>
+    </a>
+    <div class="create-meet-header-text">
+      <span class="create-meet-title">Create Meet</span>
+      <span class="create-meet-subtitle">Set up a new competition</span>
+    </div>
+  </div>
 
-<form method="POST">
-  <label>Meet Name:</label><br />
-  <input type="text" name="meet_name" required /><br /><br />
+  <!-- ── Form ── -->
+  <div class="create-meet-content">
+    <form method="POST" id="create-meet-form">
+      <!-- Meet Info Card -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <ion-icon name="trophy-outline"></ion-icon>
+          <span>Meet Info</span>
+        </div>
 
-  <label>Event Date:</label><br />
-  <input type="date" name="event_date" required /><br /><br />
+        <div class="form-card-body">
+          <div class="form-group">
+            <label class="form-label">Meet Name</label>
+            <input
+              class="form-input"
+              type="text"
+              name="meet_name"
+              placeholder="e.g. Antipolo Open II"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Date</label>
+            <input class="form-input" type="date" name="event_date" required />
+          </div>
+        </div>
+      </div>
 
-  <h4>Events</h4>
+      <!-- Events Card -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <ion-icon name="cube-outline"></ion-icon>
+          <span>Events</span>
+        </div>
 
-  <table id="events-table">
-    <thead>
-      <tr>
-        <th>Event</th>
-        <th>Rounds</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="events-body">
-      <tr>
-        <td>
-          <select name="event_name[]" required>
-            <option value="3x3">3x3</option>
-            <option value="2x2">2x2</option>
-            <option value="4x4">4x4</option>
-            <option value="5x5">5x5</option>
-            <option value="6x6">6x6</option>
-            <option value="7x7">7x7</option>
-            <option value="Pyraminx">Pyraminx</option>
-            <option value="Megaminx">Megaminx</option>
-            <option value="Skewb">Skewb</option>
-          </select>
-        </td>
+        <table class="events-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Rounds</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-body">
+            <tr class="event-row">
+              <td>
+                <select name="event_name[]" class="form-select" required>
+                  <option value="3x3x3 Cube">3x3x3 Cube</option>
+                  <option value="2x2x2 Cube">2x2x2 Cube</option>
+                  <option value="4x4x4 Cube">4x4x4 Cube</option>
+                  <option value="5x5x5 Cube">5x5x5 Cube</option>
+                  <option value="6x6x6 Cube">6x6x6 Cube</option>
+                  <option value="7x7x7 Cube">7x7x7 Cube</option>
 
-        <td>
-          <input type="number" name="rounds[]" min="1" value="1" required />
-        </td>
+                  <option value="3x3x3 One-Handed">3x3x3 One-Handed</option>
+                  <option value="Clock">Clock</option>
+                  <option value="Megaminx">Megaminx</option>
+                  <option value="Pyraminx">Pyraminx</option>
+                  <option value="Skewb">Skewb</option>
+                  <option value="Square-1">Square-1</option>
 
-        <td>
-          <button type="button" onclick="removeRow(this)">Remove</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+                  <option value="3x3x3 Fewest Moves">3x3x3 Fewest Moves</option>
 
-  <br />
+                  <option value="3x3x3 Blindfolded">3x3x3 Blindfolded</option>
+                  <option value="4x4x4 Blindfolded">4x4x4 Blindfolded</option>
+                  <option value="5x5x5 Blindfolded">5x5x5 Blindfolded</option>
 
-  <button type="button" onclick="addRow()">Add Event</button>
+                  <option value="3x3x3 Multi-Blind">3x3x3 Multi-Blind</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="form-input rounds-input"
+                  type="number"
+                  name="rounds[]"
+                  min="1"
+                  value="1"
+                  required
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="remove-row-btn"
+                  onclick="removeRow(this)"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-  <br /><br />
+        <div class="add-event-row">
+          <button type="button" class="add-event-btn" onclick="addRow()">
+            <ion-icon name="add"></ion-icon>
+            Add Event
+          </button>
+        </div>
+      </div>
 
-  <button type="submit">Create Meet</button>
-</form>
-
-<br />
-
-<a href="{{ url_for('home') }}">
-  <button>Cancel</button>
-</a>
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">
+          <ion-icon name="checkmark"></ion-icon>
+          Create Meet
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
+  const rowTemplate = `
+    <tr class="event-row">
+      <td>
+        <select name="event_name[]" class="form-select" required>
+          <option value="3x3x3 Cube">3x3x3 Cube</option>
+          <option value="2x2x2 Cube">2x2x2 Cube</option>
+          <option value="4x4x4 Cube">4x4x4 Cube</option>
+          <option value="5x5x5 Cube">5x5x5 Cube</option>
+          <option value="6x6x6 Cube">6x6x6 Cube</option>
+          <option value="7x7x7 Cube">7x7x7 Cube</option>
+
+          <option value="3x3x3 One-Handed">3x3x3 One-Handed</option>
+          <option value="Clock">Clock</option>
+          <option value="Megaminx">Megaminx</option>
+          <option value="Pyraminx">Pyraminx</option>
+          <option value="Skewb">Skewb</option>
+          <option value="Square-1">Square-1</option>
+
+          <option value="3x3x3 Fewest Moves">3x3x3 Fewest Moves</option>
+
+          <option value="3x3x3 Blindfolded">3x3x3 Blindfolded</option>
+          <option value="4x4x4 Blindfolded">4x4x4 Blindfolded</option>
+          <option value="5x5x5 Blindfolded">5x5x5 Blindfolded</option>
+
+          <option value="3x3x3 Multi-Blind">3x3x3 Multi-Blind</option>
+        </select>
+      </td>
+      <td>
+        <input class="form-input rounds-input" type="number" name="rounds[]" min="1" value="1" required />
+      </td>
+      <td>
+        <button type="button" class="remove-row-btn" onclick="removeRow(this)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </td>
+    </tr>
+  `;
+
   function addRow() {
-    const table = document.getElementById("events-body");
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-        <td>
-            <select name="event_name[]" required>
-                <option value="3x3">3x3</option>
-                <option value="2x2">2x2</option>
-                <option value="4x4">4x4</option>
-                <option value="5x5">5x5</option>
-                <option value="6x6">6x6</option>
-                <option value="7x7">7x7</option>
-                <option value="Pyraminx">Pyraminx</option>
-                <option value="Megaminx">Megaminx</option>
-                <option value="Skewb">Skewb</option>
-            </select>
-        </td>
-
-        <td>
-            <input type="number" name="rounds[]" min="1" value="1" required>
-        </td>
-
-        <td>
-            <button type="button" onclick="removeRow(this)">Remove</button>
-        </td>
-    `;
-
-    table.appendChild(row);
+    document
+      .getElementById("events-body")
+      .insertAdjacentHTML("beforeend", rowTemplate);
   }
 
   function removeRow(button) {
-    const row = button.parentElement.parentElement;
-    row.remove();
+    const rows = document.querySelectorAll(".event-row");
+    if (rows.length === 1) return; // keep at least one row
+    button.closest("tr").remove();
   }
 </script>
 

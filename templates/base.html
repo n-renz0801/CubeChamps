@@ -7,21 +7,49 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/base.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.cubing.net/v0/css/@cubing/icons/css"
+    />
     <title>CubeChamps</title>
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
-    <nav>
-      <h2>CubeChamps</h2>
+    <header>
+      <!-- <a class="logo" href="/"><img src="images/logo.svg" alt="logo" /></a> -->
+      <h1 class="logo">CubeChamps</h1>
+      <nav>
+        <ul class="nav__links">
+          {% if not_homepage %}
+          <li>
+            <a href="{{ url_for('persons', meet_id=meet.id) }}"
+              ><ion-icon name="people"></ion-icon>Persons</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('podiums', meet_id=meet.id) }}"
+              ><ion-icon name="list"></ion-icon>Podiums</a
+            >
+          </li>
 
+          {% endif %}
+        </ul>
+      </nav>
       {% if not_homepage %}
-      <a href="{{ url_for('persons', meet_id=meet.id) }}">Persons</a>
-      <a href="{{ url_for('podiums', meet_id=meet.id) }}">Podiums</a>
-      <a href="{{ url_for('home') }}">Home</a>
+      <a class="cta" href="{{ url_for('home') }}"
+        ><ion-icon name="home"></ion-icon
+      ></a>
       {% endif %}
-    </nav>
-
-    <hr />
+    </header>
 
     {% block content %}{% endblock %}
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
   </body>
 </html>

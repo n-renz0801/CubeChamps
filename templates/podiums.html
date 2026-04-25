@@ -1,49 +1,103 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/podiums.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h2>{{ meet.name }}</h2>
-<h3>Podiums</h3>
+<div class="podiums-wrapper">
+  <!-- ── Header ── -->
+  <div class="podiums-header">
+    <a
+      href="{{ url_for('meet_detail', meet_id=meet.id) }}"
+      class="podiums-back-btn"
+      title="Back to Meet"
+    >
+      <ion-icon name="arrow-back"></ion-icon>
+    </a>
+    <div class="podiums-header-text">
+      <span class="podiums-title">Podiums</span>
+      <span class="podiums-subtitle">{{ meet.name }}</span>
+    </div>
+  </div>
 
-{% for entry in events_podiums %}
-<!-- <h4>{{ entry.event.name }} — Round {{ entry.last_round.round_number }}</h4> -->
-<h4>{{ entry.event.name }}</h4>
+  <!-- ── Content ── -->
+  <div class="podiums-content">
+    {% for entry in events_podiums %}
 
-{% if entry.podium %}
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>Average</th>
-      <th>Best</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in entry.podium %}
-    <tr>
-      <td>{{ row.rank }}</td>
-      <td>{{ row.name }}</td>
-      {% for t in row.times %}
-      <td>{{ t if t else '—' }}</td>
-      {% endfor %}
-      <td>
-        {% if row.average is none %}— {% elif row.average == 'DNF' %}DNF {% else
-        %}{{ "%.2f" | format(row.average) }} {% endif %}
-      </td>
-      <td>
-        {% if row.best is none %}— {% else %}{{ "%.2f" | format(row.best) }} {%
-        endif %}
-      </td>
-    </tr>
+    <div class="event-section">
+      <div class="event-section-header">
+        {% set icons = { '3x3x3 Cube': 'event-333', '2x2x2 Cube': 'event-222',
+        '4x4x4 Cube': 'event-444', '5x5x5 Cube': 'event-555', '6x6x6 Cube':
+        'event-666', '7x7x7 Cube': 'event-777', '3x3x3 Blindfolded':
+        'event-333bf', '3x3x3 Fewest Moves': 'event-333fm', '3x3x3 One-Handed':
+        'event-333oh', 'Clock': 'event-clock', 'Megaminx': 'event-minx',
+        'Pyraminx': 'event-pyram', 'Skewb': 'event-skewb', 'Square-1':
+        'event-sq1', '4x4x4 Blindfolded': 'event-444bf', '5x5x5 Blindfolded':
+        'event-555bf', '3x3x3 Multi-Blind': 'event-333mbf' } %}
+        <span
+          class="cubing-icon {{ icons.get(entry.event.name, 'event-333') }}"
+        ></span>
+        <span class="event-section-name">{{ entry.event.name }}</span>
+      </div>
+
+      {% if entry.podium %}
+      <table class="podium-table">
+        <colgroup>
+          <col style="width: 6%" />
+          <col style="width: 10%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+          <col style="width: 12%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+            <th>Average</th>
+            <th>Best</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in entry.podium %}
+          <tr class="rank-{{ row.rank }}">
+            <td class="rank-cell">{{ row.rank }}</td>
+            <td class="name-cell">{{ row.name }}</td>
+            {% for t in row.times %}
+            <td class="time-cell">
+              {{ "%.2f" | format(t | float) if t else '—' }}
+            </td>
+            {% endfor %}
+            <td class="avg-cell">
+              {% if row.average is none %}— {% elif row.average == 'DNF' %}DNF
+              {% else %}{{ "%.2f" | format(row.average) }} {% endif %}
+            </td>
+            <td class="best-cell">
+              {% if row.best is none %}— {% else %}{{ "%.2f" | format(row.best)
+              }} {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="no-solves-msg">No solves recorded for this event yet.</p>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <p class="no-solves-msg">No events found for this meet.</p>
     {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>No solves recorded for this event yet.</p>
-{% endif %} {% else %}
-<p>No events found for this meet.</p>
-{% endfor %} {% endblock %}
+  </div>
+</div>
+
+{% endblock %}

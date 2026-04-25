@@ -1,24 +1,45 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/persons.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h3>All Persons</h3>
+<div class="persons-wrapper">
+  <!-- ── Header ── -->
+  <div class="persons-header">
+    <a
+      href="{{ url_for('meet_detail', meet_id=meet.id) }}"
+      class="persons-back-btn"
+      title="Back to Meet"
+    >
+      <ion-icon name="arrow-back"></ion-icon>
+    </a>
+    <div class="persons-header-text">
+      <span class="persons-title">Persons</span>
+      <span class="persons-subtitle">{{ meet.name }}</span>
+    </div>
+  </div>
 
-<table>
-  <tbody>
-    {% for person in competitors %}
-    <tr>
-      <td>
-        <a
-          href="{{ url_for('person_detail', meet_id=meet.id, competitor_id=person.id) }}"
-        >
-          {{ person.name }}
-        </a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <!-- ── Content ── -->
+  <div class="persons-content">
+    {% if competitors %}
+    <div class="persons-card">
+      {% for person in competitors %}
+      <a
+        href="{{ url_for('person_detail', meet_id=meet.id, competitor_id=person.id) }}"
+        class="person-row"
+      >
+        <div class="person-avatar">{{ person.name[0].upper() }}</div>
+        <span class="person-name">{{ person.name }}</span>
+        <ion-icon name="chevron-forward" class="person-chevron"></ion-icon>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-data-msg">No persons registered for this meet yet.</p>
+    {% endif %}
+  </div>
+</div>
 
-<a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
-  <button type="button">Back to Meet</button>
-</a>
 {% endblock %}

@@ -1,0 +1,291 @@
+/* ── Layout ── */
+.create-meet-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 10% 0.5rem;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.create-meet-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 1.2rem 1.5rem 1rem;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.create-meet-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 100%;
+  border-radius: 8px;
+  background: #24252a;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.create-meet-back-btn:hover {
+  opacity: 0.9;
+}
+
+.create-meet-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.create-meet-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.create-meet-subtitle {
+  font-size: 0.9rem;
+  color: #7b7b7b;
+  letter-spacing: 0.03em;
+}
+
+/* ── Content ── */
+.create-meet-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 1.5rem;
+  margin: 0.5rem 0 1.2rem;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.create-meet-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.create-meet-content::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+/* ── Form Cards ── */
+.form-card {
+  border-radius: 0.8rem;
+  box-shadow: 0 0.4rem 0.8rem #0005;
+  overflow: hidden;
+  background: #fff;
+}
+
+.form-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.9rem 1.2rem;
+  background: #24252a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.form-card-header ion-icon {
+  font-size: 1.2rem;
+}
+
+.form-card-body {
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Form Groups ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #aaa;
+}
+
+.form-input {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.95rem;
+  background: #fafafa;
+  color: #111;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #111;
+  background: #fff;
+}
+
+/* ── Events Table ── */
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.events-table thead tr {
+  border-bottom: 1.5px solid #f0f0f0;
+}
+
+.events-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #aaa;
+}
+
+.events-table th:last-child {
+  width: 48px;
+}
+
+.events-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+
+.events-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.form-select {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.9rem;
+  background: #fafafa;
+  color: #111;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  border-color: #111;
+  background: #fff;
+}
+
+.rounds-input {
+  width: 72px;
+  text-align: center;
+  padding: 7px 10px;
+}
+
+/* ── Remove Button ── */
+.remove-row-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #ccc;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.remove-row-btn:hover {
+  background: #fff0f0;
+  color: #c0392b;
+}
+
+/* ── Add Event Row ── */
+.add-event-row {
+  padding: 10px 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.add-event-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px dashed #ccc;
+  border-radius: 8px;
+  background: transparent;
+  color: #888;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.add-event-btn:hover {
+  border-color: #111;
+  color: #111;
+}
+
+.add-event-btn ion-icon {
+  font-size: 1rem;
+}
+
+/* ── Submit ── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px;
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  background: #467750;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.submit-btn ion-icon {
+  font-size: 1.1rem;
+}

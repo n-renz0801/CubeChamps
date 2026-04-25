@@ -1,0 +1,209 @@
+/* ── Layout ── */
+.home-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 10% 3rem;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem 1rem;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.home-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.home-subtitle {
+  font-size: 0.9rem;
+  color: #7b7b7b;
+  letter-spacing: 0.03em;
+}
+
+.all-persons-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: #24252a;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+
+.all-persons-btn:hover {
+  opacity: 0.85;
+}
+
+.all-persons-btn ion-icon {
+  font-size: 1.1rem;
+}
+
+/* ── Content ── */
+.home-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 1.5rem;
+  margin: 0.5rem 0 1.2rem;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.home-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.home-content::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+/* ── Section Label ── */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #aaa;
+  padding: 0 4px;
+}
+
+/* ── Meets Card ── */
+.meets-card {
+  border-radius: 0.8rem;
+  box-shadow: 0 0.4rem 0.8rem #0005;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ── Meet Row ── */
+.meet-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  text-decoration: none;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.1s;
+}
+
+.meet-row:last-child {
+  border-bottom: none;
+}
+
+.meet-row:hover {
+  background: #fafafa;
+}
+
+/* ── Avatar ── */
+.meet-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #24252a;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Meet Info ── */
+.meet-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meet-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.01em;
+}
+
+.meet-date {
+  font-size: 0.8rem;
+  color: #999;
+  letter-spacing: 0.02em;
+}
+
+/* ── Chevron ── */
+.meet-chevron {
+  font-size: 1rem;
+  color: #ccc;
+  transition: color 0.1s;
+}
+
+.meet-row:hover .meet-chevron {
+  color: #888;
+}
+
+/* ── Footer ── */
+.home-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 1.5rem 0;
+}
+
+.create-meet-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: #467750;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+
+.create-meet-btn:hover {
+  opacity: 0.9;
+}
+
+.create-meet-btn ion-icon {
+  font-size: 1.1rem;
+}
+
+/* ── Fallback ── */
+.no-data-msg {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-style: italic;
+  padding: 1rem 1.2rem;
+  background: #fff;
+  border-radius: 0.8rem;
+  box-shadow: 0 0.4rem 0.8rem #0005;
+}

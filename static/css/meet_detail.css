@@ -1,0 +1,239 @@
+.meet-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  padding: 2rem 10% 5rem;
+  box-sizing: border-box;
+}
+
+/* ── Meet Name ── */
+.meet-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+  color: var(--color-text-primary, #111);
+}
+
+/* ── Event Tiles Row ── */
+.events-scroll-area {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 1rem;
+  flex: 1;
+  align-items: flex-start;
+  cursor: grab;
+
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge old */
+}
+
+.events-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+.events-scroll-area:active {
+  cursor: grabbing;
+}
+
+/* ── Event Tile ── */
+.event-tile {
+  flex-shrink: 0;
+  width: 25%;
+  min-width: 250px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 14px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Top section: icon + name */
+.tile-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+}
+
+.tile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  flex-shrink: 0;
+}
+
+.tile-event-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+}
+
+.tile-divider {
+  height: 1px;
+  background: #ebebeb;
+  margin: 0;
+}
+
+/* Rounds section */
+.tile-rounds {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 60px;
+}
+
+.tile-rounds a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  color: #555;
+  text-decoration: none;
+  padding: 12px 10px;
+  background: #f7f7f7;
+  border-radius: 7px;
+  border: 1px solid #e8e8e8;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.tile-rounds a:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.round-dot {
+  width: 6px;
+  height: 6px;
+  background: #bbb;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tile-rounds a:hover .round-dot {
+  background: #fff;
+}
+
+.no-rounds {
+  font-size: 0.75rem;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Bottom actions */
+.tile-actions {
+  padding: 10px 12px;
+  display: flex;
+  gap: 6px;
+  justify-content: space-around;
+  background: #fafafa;
+  border-top: 1px solid #ebebeb;
+}
+
+.tile-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  height: 32px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  padding: 0;
+}
+
+.tile-btn:hover {
+  background: #ececec;
+  color: #111;
+}
+
+.tile-btn.delete:hover {
+  background: #fff0f0;
+  color: #c0392b;
+}
+
+.no-events-msg {
+  font-size: 0.85rem;
+  color: #aaa;
+  padding-top: 1rem;
+}
+
+/* ── Fixed Bottom Bar ── */
+.add-event-bar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1.5px solid #e8e8e8;
+  padding: 14px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.add-event-bar label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.add-event-bar select,
+.add-event-bar input[type="number"] {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background: #fafafa;
+  color: #111;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.add-event-bar select:focus,
+.add-event-bar input[type="number"]:focus {
+  border-color: #111;
+}
+
+.add-event-bar input[type="number"] {
+  width: 64px;
+}
+
+.add-event-bar button[type="submit"] {
+  background: #467750;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+
+.add-event-bar button[type="submit"]:hover {
+  opacity: 0.9;
+}

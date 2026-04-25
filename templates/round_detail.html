@@ -1,97 +1,141 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/round_detail.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<h3>{{ event.name }} - Round {{ round_obj.round_number }}</h3>
+<div class="round-detail-wrapper">
+  <!-- ── Header ── -->
+  <div class="round-header">
+    <a
+      href="{{ url_for('meet_detail', meet_id=meet.id) }}"
+      class="round-back-btn"
+      title="Back to Meet"
+      ><ion-icon name="arrow-back"></ion-icon
+    ></a>
+    <div class="round-header-text">
+      <span class="round-event-name"
+        >{{ event.name }} — Round {{ round_obj.round_number }}</span
+      >
+      <span class="round-subtitle">{{ meet.name }}</span>
+    </div>
+  </div>
 
-<!-- ✅ Add Solver Button -->
-<form
-  method="POST"
-  action="{{ url_for('add_solver', event_id=event.id, round_number=round_obj.round_number) }}"
->
-  <button type="submit">Add Solver</button>
-</form>
+  <!-- ── Table ── -->
+  <div class="round-table-area">
+    <table class="solves-table">
+      <colgroup>
+        <col style="width: 6%" />
+        <col style="width: 10%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+        <col style="width: 12%" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th>4</th>
+          <th>5</th>
+          <th>Average</th>
+          <th>Best</th>
+        </tr>
+      </thead>
 
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>Average</th>
-      <th>Best</th>
-    </tr>
-  </thead>
+      <tbody id="solves-body">
+        {% for solve in solves %}
+        <tr data-solve-id="{{ solve.id }}">
+          <td class="rank-cell"></td>
 
-  <tbody id="solves-body">
-    {% for solve in solves %}
-    <tr data-solve-id="{{ solve.id }}">
-      <td class="rank-cell"></td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="name"
+              type="text"
+              value="{{ solve.competitor.name }}"
+            />
+          </td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="attempt1"
+              value="{{ solve.attempt1 or '' }}"
+              placeholder=" "
+            />
+          </td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="attempt2"
+              value="{{ solve.attempt2 or '' }}"
+              placeholder=" "
+            />
+          </td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="attempt3"
+              value="{{ solve.attempt3 or '' }}"
+              placeholder=" "
+            />
+          </td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="attempt4"
+              value="{{ solve.attempt4 or '' }}"
+              placeholder=" "
+            />
+          </td>
+          <td>
+            <input
+              class="solve-input"
+              data-field="attempt5"
+              value="{{ solve.attempt5 or '' }}"
+              placeholder=" "
+            />
+          </td>
 
-      <!-- Competitor Name -->
-      <td>
-        <input
-          class="solve-input"
-          data-field="name"
-          type="text"
-          value="{{ solve.competitor.name }}"
-        />
-      </td>
+          {% set times = [solve.attempt1, solve.attempt2, solve.attempt3,
+          solve.attempt4, solve.attempt5] %}
+          <td class="avg-cell">
+            {% set avg = compute_average(times) %} {% if avg is none %}— {% elif
+            avg == 'DNF' %}DNF {% else %}{{ "%.2f" | format(avg) }} {% endif %}
+          </td>
+          <td class="best-cell">
+            {% set best = compute_best(times) %} {% if best is none %}— {% else
+            %}{{ "%.2f" | format(best) }} {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-      <!-- Attempts -->
-      <td>
-        <input
-          class="solve-input"
-          data-field="attempt1"
-          value="{{ solve.attempt1 or '' }}"
-        />
-      </td>
-      <td>
-        <input
-          class="solve-input"
-          data-field="attempt2"
-          value="{{ solve.attempt2 or '' }}"
-        />
-      </td>
-      <td>
-        <input
-          class="solve-input"
-          data-field="attempt3"
-          value="{{ solve.attempt3 or '' }}"
-        />
-      </td>
-      <td>
-        <input
-          class="solve-input"
-          data-field="attempt4"
-          value="{{ solve.attempt4 or '' }}"
-        />
-      </td>
-      <td>
-        <input
-          class="solve-input"
-          data-field="attempt5"
-          value="{{ solve.attempt5 or '' }}"
-        />
-      </td>
-
-      {% set times = [ solve.attempt1, solve.attempt2, solve.attempt3,
-      solve.attempt4, solve.attempt5 ] %}
-
-      <!-- Computed values -->
-      <td class="avg-cell">{{ compute_average(times) or "-" }}</td>
-      <td class="best-cell">{{ compute_best(times) or "-" }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<!-- Back Button -->
-<a href="{{ url_for('meet_detail', meet_id=meet.id) }}">
-  <button type="button">Back to Meet</button>
-</a>
+  <!-- ── Footer ── -->
+  <div class="round-footer">
+    <span class="solver-count"
+      >{{ solves|length }} competitor{{ 's' if solves|length != 1 else ''
+      }}</span
+    >
+    <form
+      method="POST"
+      action="{{ url_for('add_solver', event_id=event.id, round_number=round_obj.round_number) }}"
+    >
+      <button type="submit" class="add-solver-btn">
+        <ion-icon class="btn-icon" name="add"></ion-icon> Add Solver
+      </button>
+    </form>
+  </div>
+</div>
 
 <script src="{{ url_for('static', filename='js/round_detail.js') }}"></script>
 {% endblock %}

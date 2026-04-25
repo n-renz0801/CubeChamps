@@ -179,8 +179,23 @@ function deleteSolve(row) {
    INIT
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
+  // Format all attempt inputs on load
   document.querySelectorAll(".solve-input").forEach((inp) => {
+    if (inp.dataset.field !== "name") {
+      inp.value = formatTimeDisplay(inp.value);
+    }
     inp.dataset.lastValid = inp.value;
+  });
+
+  // Format all avg/best cells on load
+  document.querySelectorAll(".avg-cell").forEach((cell) => {
+    const val = cell.innerText.trim();
+    if (val && val !== "—") cell.innerText = formatResult(val);
+  });
+
+  document.querySelectorAll(".best-cell").forEach((cell) => {
+    const val = cell.innerText.trim();
+    if (val && val !== "—") cell.innerText = formatResult(val);
   });
 
   reorderTable();
