@@ -423,6 +423,22 @@ def persons(meet_id):
         not_homepage=True
     )
 
+@app.route("/persons")
+def global_persons():
+    all_competitors = Competitor.query.filter(
+        Competitor.name != "",
+        Competitor.name != "New Solver"
+    ).order_by(Competitor.name.asc()).all()
+
+    # Deduplicate by name since "Jed" may exist across multiple meets
+    seen = set()
+    unique_competitors = []
+    for c in all_competitors:
+        if c.name not in seen:
+            seen.add(c.name)
+            unique_competitors.append(c)
+
+    return render_template("global_persons.html", competitors=unique_competitors)
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
