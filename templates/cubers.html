@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+
+<h3>All Persons</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for person in competitors %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ person.name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

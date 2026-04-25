@@ -61,6 +61,10 @@ class Competitor(db.Model):
     name = db.Column(db.String(100), nullable=False)
     cubemeet_id = db.Column(db.Integer, db.ForeignKey('cubemeets.id'), nullable=False)
 
+    __table_args__ = (
+        db.UniqueConstraint('name', 'cubemeet_id', name='unique_competitor_per_meet'),
+    )
+
 
 class Solve(db.Model):
     __tablename__ = 'solves'
@@ -127,7 +131,11 @@ def create_meet():
 @app.route("/meet/<int:meet_id>")
 def meet_detail(meet_id):
     meet = CubeMeet.query.get_or_404(meet_id)
-    return render_template("meet_detail.html", meet=meet)
+    return render_template(
+        "meet_detail.html",
+        meet=meet,
+        not_homepage=True
+    )
 
 
 @app.route("/event/<int:event_id>/add_round", methods=["POST"])
@@ -288,12 +296,14 @@ def round_detail(round_id):
         round_obj=round_obj,
         event=event,
         meet=meet,
-        solves=solves
+        solves=solves,
+        not_homepage=True
     )
 
 
 @app.route("/event/<int:event_id>/round/<int:round_number>/add_solver", methods=["POST"])
 def add_solver(event_id, round_number):
+
     event = Event.query.get_or_404(event_id)
 
     round_obj = Round.query.filter_by(
@@ -301,12 +311,13 @@ def add_solver(event_id, round_number):
         round_number=round_number
     ).first_or_404()
 
+    # ✅ ALWAYS create a fresh competitor
     competitor = Competitor(
-        name="New Solver",
+        name="",
         cubemeet_id=event.cubemeet_id
     )
     db.session.add(competitor)
-    db.session.commit()
+    db.session.flush()
 
     solve = Solve(
         event_id=event.id,
@@ -322,6 +333,7 @@ def add_solver(event_id, round_number):
 
 @app.route("/solve/<int:solve_id>/update", methods=["POST"])
 def update_solve(solve_id):
+
     solve = Solve.query.get_or_404(solve_id)
     data = request.get_json()
 
@@ -336,8 +348,25 @@ def update_solve(solve_id):
             "solve_id": solve_id
         })
 
-    solve.competitor.name = name
+    # 👇 THIS IS WHERE YOUR NEW BLOCK GOES
+    old_competitor = solve.competitor
 
+    existing = Competitor.query.filter_by(
+        name=name,
+        cubemeet_id=old_competitor.cubemeet_id
+    ).first()
+
+    if existing:
+        solve.competitor = existing
+    else:
+        old_competitor.name = name
+
+    db.session.flush()
+
+    if not Solve.query.filter_by(competitor_id=old_competitor.id).first():
+        db.session.delete(old_competitor)
+
+    # attempts update stays the same
     solve.attempt1 = data.get("attempt1")
     solve.attempt2 = data.get("attempt2")
     solve.attempt3 = data.get("attempt3")
@@ -375,6 +404,24 @@ def delete_solve(solve_id):
         db.session.commit()
 
     return '', 204
+
+
+@app.route("/meet/<int:meet_id>/persons")
+def persons(meet_id):
+    meet = CubeMeet.query.get_or_404(meet_id)
+
+    competitors = Competitor.query.filter(
+        Competitor.cubemeet_id == meet_id,
+        Competitor.name != "",            # ✅ remove empty
+        Competitor.name != "New Solver"   # (optional safety)
+    ).order_by(Competitor.name.asc()).all()
+
+    return render_template(
+        "persons.html",
+        competitors=competitors,
+        meet=meet,
+        not_homepage=True
+    )
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
