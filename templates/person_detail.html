@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>{{ competitor.name }}</h2>
+<p>{{ meet.name }} &mdash; {{ meet.date }}</p>
+
+{% for event_data in events_data %}
+<h3>{{ event_data.event.name }}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Round</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>Average</th>
+      <th>Best</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in event_data.rounds %}
+    <tr>
+      <td>{{ r.rank }}</td>
+      <td>Round {{ r.round.round_number }}</td>
+      {% for t in r.times %}
+      <td>{{ t if t else '—' }}</td>
+      {% endfor %}
+      <td>
+        {% if r.average is none %}— {% elif r.average == 'DNF' %}DNF {% else
+        %}{{ "%.2f" | format(r.average) }} {% endif %}
+      </td>
+      <td>
+        {% if r.best is none %}— {% else %}{{ "%.2f" | format(r.best) }} {%
+        endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No events found for this person in this meet.</p>
+{% endfor %}
+
+<a href="{{ url_for('persons', meet_id=meet.id) }}">
+  <button type="button">Back to Persons</button>
+</a>
+{% endblock %}

@@ -440,6 +440,66 @@ def global_persons():
 
     return render_template("global_persons.html", competitors=unique_competitors)
 
+
+@app.route("/meet/<int:meet_id>/person/<int:competitor_id>")
+def person_detail(meet_id, competitor_id):
+    meet = CubeMeet.query.get_or_404(meet_id)
+    competitor = Competitor.query.get_or_404(competitor_id)
+
+    # All solves for this competitor in this meet
+    solves = (
+        Solve.query
+        .filter_by(competitor_id=competitor_id)
+        .join(Event, Solve.event_id == Event.id)
+        .filter(Event.cubemeet_id == meet_id)
+        .all()
+    )
+
+    # Group solves by event → round
+    events_map = {}
+    for solve in solves:
+        event = solve.round.event
+        if event.id not in events_map:
+            events_map[event.id] = {'event': event, 'rounds': []}
+        events_map[event.id]['rounds'].append(solve)
+
+    # Build result with ranking per round
+    def rank_key(s):
+        times = [s.attempt1, s.attempt2, s.attempt3, s.attempt4, s.attempt5]
+        avg = compute_average(times)
+        count = len([t for t in times if t is not None])
+        avg_numeric = float('inf') if (avg is None or avg == 'DNF') else avg
+        return (count, -avg_numeric)
+
+    result = []
+    for event_id, data in events_map.items():
+        rounds_info = []
+        for solve in sorted(data['rounds'], key=lambda s: s.round.round_number):
+            # Rank: compare against all solves in that round
+            all_round_solves = Solve.query.filter_by(round_id=solve.round_id).all()
+            sorted_round = sorted(all_round_solves, key=rank_key, reverse=True)
+            rank = next((i + 1 for i, s in enumerate(sorted_round) if s.id == solve.id), '-')
+
+            times = [solve.attempt1, solve.attempt2, solve.attempt3, solve.attempt4, solve.attempt5]
+            rounds_info.append({
+                'round': solve.round,
+                'solve': solve,
+                'times': times,
+                'average': compute_average(times),
+                'best': compute_best(times),
+                'rank': rank
+            })
+
+        result.append({'event': data['event'], 'rounds': rounds_info})
+
+    return render_template(
+        'person_detail.html',
+        meet=meet,
+        competitor=competitor,
+        events_data=result,
+        not_homepage=True
+    )
+
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(debug=True)
