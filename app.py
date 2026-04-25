@@ -500,6 +500,113 @@ def person_detail(meet_id, competitor_id):
         not_homepage=True
     )
 
+
+@app.route("/persons/<string:competitor_name>")
+def global_person_detail(competitor_name):
+    # Get all Competitor rows that share this name (across all meets)
+    all_entries = Competitor.query.filter_by(name=competitor_name).all()
+    competitor_ids = [c.id for c in all_entries]
+
+    # Get all solves for this person across all meets
+    solves = Solve.query.filter(Solve.competitor_id.in_(competitor_ids)).all()
+
+    # Group by event NAME (not id, since same event can exist in diff meets)
+    events_map = {}  # event_name → { best_single, best_avg }
+
+    for solve in solves:
+        event = solve.round.event
+        event_name = event.name
+
+        times = [
+            solve.attempt1, solve.attempt2, solve.attempt3,
+            solve.attempt4, solve.attempt5
+        ]
+
+        single = compute_best(times)
+        avg = compute_average(times)
+
+        if event_name not in events_map:
+            events_map[event_name] = {'best_single': None, 'best_avg': None}
+
+        # Update best single
+        if single is not None:
+            current_single = events_map[event_name]['best_single']
+            if current_single is None or single < current_single:
+                events_map[event_name]['best_single'] = single
+
+        # Update best average (lower is better, DNF is worst)
+        if avg is not None and avg != 'DNF':
+            current_avg = events_map[event_name]['best_avg']
+            if current_avg is None or avg < current_avg:
+                events_map[event_name]['best_avg'] = avg
+
+    # Sort events alphabetically
+    records = sorted(
+        [{'event': name, **data} for name, data in events_map.items()],
+        key=lambda x: x['event']
+    )
+
+    return render_template(
+        'global_person_detail.html',
+        competitor_name=competitor_name,
+        records=records
+    )
+
+
+@app.route("/meet/<int:meet_id>/podiums")
+def podiums(meet_id):
+    meet = CubeMeet.query.get_or_404(meet_id)
+
+    events_podiums = []
+
+    for event in meet.events:
+        # Get the last round of this event
+        last_round = (
+            Round.query
+            .filter_by(event_id=event.id)
+            .order_by(Round.round_number.desc())
+            .first()
+        )
+        if not last_round:
+            continue
+
+        # Get all solves in that last round
+        solves = Solve.query.filter_by(round_id=last_round.id).all()
+
+        def rank_key(s):
+            times = [s.attempt1, s.attempt2, s.attempt3, s.attempt4, s.attempt5]
+            avg = compute_average(times)
+            count = len([t for t in times if t is not None])
+            avg_numeric = float('inf') if (avg is None or avg == 'DNF') else avg
+            return (count, -avg_numeric)
+
+        sorted_solves = sorted(solves, key=rank_key, reverse=True)
+        top3 = sorted_solves[:3]
+
+        podium_rows = []
+        for rank, solve in enumerate(top3, start=1):
+            times = [solve.attempt1, solve.attempt2, solve.attempt3, solve.attempt4, solve.attempt5]
+            podium_rows.append({
+                'rank': rank,
+                'name': solve.competitor.name,
+                'times': times,
+                'average': compute_average(times),
+                'best': compute_best(times),
+            })
+
+        events_podiums.append({
+            'event': event,
+            'last_round': last_round,
+            'podium': podium_rows
+        })
+
+    return render_template(
+        'podiums.html',
+        meet=meet,
+        events_podiums=events_podiums,
+        not_homepage=True
+    )
+
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(debug=True)

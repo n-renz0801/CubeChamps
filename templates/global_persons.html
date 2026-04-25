@@ -6,7 +6,13 @@
   <tbody>
     {% for person in competitors %}
     <tr>
-      <td>{{ person.name }}</td>
+      <td>
+        <a
+          href="{{ url_for('global_person_detail', competitor_name=person.name) }}"
+        >
+          {{ person.name }}
+        </a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>

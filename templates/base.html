@@ -15,6 +15,7 @@
 
       {% if not_homepage %}
       <a href="{{ url_for('persons', meet_id=meet.id) }}">Persons</a>
+      <a href="{{ url_for('podiums', meet_id=meet.id) }}">Podiums</a>
       <a href="{{ url_for('home') }}">Home</a>
       {% endif %}
     </nav>

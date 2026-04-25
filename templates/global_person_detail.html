@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>{{ competitor_name }}</h2>
+
+<h3>Current Unofficial Personal Records</h3>
+
+{% if records %}
+<table>
+  <thead>
+    <tr>
+      <th>Event</th>
+      <th>Single</th>
+      <th>Average</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for record in records %}
+    <tr>
+      <td>{{ record.event }}</td>
+      <td>
+        {% if record.best_single is none %}— {% else %}{{ "%.2f" |
+        format(record.best_single) }} {% endif %}
+      </td>
+      <td>
+        {% if record.best_avg is none %}DNF {% else %}{{ "%.2f" |
+        format(record.best_avg) }} {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No records found for this person.</p>
+{% endif %}
+
+<a href="{{ url_for('global_persons') }}">
+  <button type="button">Back to All Persons</button>
+</a>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>{{ meet.name }}</h2>
+<h3>Podiums</h3>
+
+{% for entry in events_podiums %}
+<!-- <h4>{{ entry.event.name }} — Round {{ entry.last_round.round_number }}</h4> -->
+<h4>{{ entry.event.name }}</h4>
+
+{% if entry.podium %}
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>Average</th>
+      <th>Best</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in entry.podium %}
+    <tr>
+      <td>{{ row.rank }}</td>
+      <td>{{ row.name }}</td>
+      {% for t in row.times %}
+      <td>{{ t if t else '—' }}</td>
+      {% endfor %}
+      <td>
+        {% if row.average is none %}— {% elif row.average == 'DNF' %}DNF {% else
+        %}{{ "%.2f" | format(row.average) }} {% endif %}
+      </td>
+      <td>
+        {% if row.best is none %}— {% else %}{{ "%.2f" | format(row.best) }} {%
+        endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No solves recorded for this event yet.</p>
+{% endif %} {% else %}
+<p>No events found for this meet.</p>
+{% endfor %} {% endblock %}
