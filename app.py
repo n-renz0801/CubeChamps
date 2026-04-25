@@ -280,16 +280,20 @@ def round_detail(round_id):
     solves = Solve.query.filter_by(round_id=round_id).all()
 
     def sort_key(s):
-        count, avg = solve_stats(s)
-        if avg is None:
-            avg_numeric = float("inf")
-        elif avg == "DNF":
+        times = [s.attempt1, s.attempt2, s.attempt3, s.attempt4, s.attempt5]
+        avg = compute_average(times)
+        count = len([t for t in times if t is not None])
+
+        if count == 0:
+            avg_numeric = float("inf") + 1  # push empty rows to absolute bottom
+        elif avg is None or avg == "DNF":
             avg_numeric = float("inf")
         else:
             avg_numeric = avg
-        return (count, -avg_numeric)
 
-    solves = sorted(solves, key=sort_key, reverse=True)
+        return avg_numeric  # lower average = better rank
+
+    solves = sorted(solves, key=sort_key)
 
     return render_template(
         "round_detail.html",
@@ -464,12 +468,16 @@ def person_detail(meet_id, competitor_id):
         events_map[event.id]['rounds'].append(solve)
 
     # Build result with ranking per round
+    # person_detail rank stays the same logic, just update rank_key there too
     def rank_key(s):
         times = [s.attempt1, s.attempt2, s.attempt3, s.attempt4, s.attempt5]
         avg = compute_average(times)
         count = len([t for t in times if t is not None])
-        avg_numeric = float('inf') if (avg is None or avg == 'DNF') else avg
-        return (count, -avg_numeric)
+        if count == 0:
+            return float("inf") + 1
+        elif avg is None or avg == "DNF":
+            return float("inf")
+        return avg
 
     result = []
     for event_id, data in events_map.items():
@@ -477,7 +485,7 @@ def person_detail(meet_id, competitor_id):
         for solve in sorted(data['rounds'], key=lambda s: s.round.round_number):
             # Rank: compare against all solves in that round
             all_round_solves = Solve.query.filter_by(round_id=solve.round_id).all()
-            sorted_round = sorted(all_round_solves, key=rank_key, reverse=True)
+            sorted_round = sorted(all_round_solves, key=rank_key)  # ascending now
             rank = next((i + 1 for i, s in enumerate(sorted_round) if s.id == solve.id), '-')
 
             times = [solve.attempt1, solve.attempt2, solve.attempt3, solve.attempt4, solve.attempt5]
@@ -573,14 +581,21 @@ def podiums(meet_id):
         # Get all solves in that last round
         solves = Solve.query.filter_by(round_id=last_round.id).all()
 
-        def rank_key(s):
+        def sort_key(s):
             times = [s.attempt1, s.attempt2, s.attempt3, s.attempt4, s.attempt5]
             avg = compute_average(times)
             count = len([t for t in times if t is not None])
-            avg_numeric = float('inf') if (avg is None or avg == 'DNF') else avg
-            return (count, -avg_numeric)
 
-        sorted_solves = sorted(solves, key=rank_key, reverse=True)
+            if count == 0:
+                avg_numeric = float("inf") + 1  # push empty rows to absolute bottom
+            elif avg is None or avg == "DNF":
+                avg_numeric = float("inf")
+            else:
+                avg_numeric = avg
+
+            return avg_numeric  # lower average = better rank
+
+        sorted_solves = sorted(solves, key=sort_key)
         top3 = sorted_solves[:3]
 
         podium_rows = []

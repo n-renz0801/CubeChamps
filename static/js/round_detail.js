@@ -145,18 +145,16 @@ function reorderTable() {
     const A = getStats(a);
     const B = getStats(b);
 
-    if (B.validCount !== A.validCount) {
-      return B.validCount - A.validCount;
-    }
+    // Push rows with no attempts at all to the bottom
+    if (A.validCount === 0 && B.validCount === 0) return 0;
+    if (A.validCount === 0) return 1;
+    if (B.validCount === 0) return -1;
 
-    if (A.avg === "DNF" && B.avg !== "DNF") return 1;
-    if (B.avg === "DNF" && A.avg !== "DNF") return -1;
+    // DNF average is worst but still ranked
+    const aAvg = A.avg === "DNF" ? Infinity : A.avg === null ? Infinity : A.avg;
+    const bAvg = B.avg === "DNF" ? Infinity : B.avg === null ? Infinity : B.avg;
 
-    if (A.avg === null && B.avg === null) return 0;
-    if (A.avg === null) return 1;
-    if (B.avg === null) return -1;
-
-    return A.avg - B.avg;
+    return aAvg - bAvg;
   });
 
   rows.forEach((row) => tbody.appendChild(row));
