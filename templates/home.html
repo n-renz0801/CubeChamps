@@ -10,7 +10,7 @@
   <div class="home-header">
     <div class="home-header-text">
       <span class="home-title">CubeChamps</span>
-      <span class="home-subtitle">Competition Manager</span>
+      <span class="home-subtitle">Unofficial Competition Manager</span>
     </div>
     <a href="{{ url_for('global_persons') }}" class="all-persons-btn">
       <ion-icon name="people-outline"></ion-icon>
@@ -33,7 +33,9 @@
           <div class="meet-avatar">{{ meet.name[0].upper() }}</div>
           <div class="meet-info">
             <span class="meet-name">{{ meet.name }}</span>
-            <span class="meet-date">{{ meet.date }}</span>
+            <span class="meet-date">
+              {{ meet.date.strftime('%B %d, %Y').replace(' 0', ' ') }}
+            </span>
           </div>
           <ion-icon name="chevron-forward" class="meet-chevron"></ion-icon>
         </a>
