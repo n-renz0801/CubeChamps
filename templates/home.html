@@ -25,14 +25,28 @@
     {% if meets %}
     <div class="meets-card">
       {% for meet in meets %}
-      <a href="{{ url_for('meet_detail', meet_id=meet.id) }}" class="meet-row">
-        <div class="meet-avatar">{{ meet.name[0].upper() }}</div>
-        <div class="meet-info">
-          <span class="meet-name">{{ meet.name }}</span>
-          <span class="meet-date">{{ meet.date }}</span>
-        </div>
-        <ion-icon name="chevron-forward" class="meet-chevron"></ion-icon>
-      </a>
+      <div class="meet-row-wrapper">
+        <a
+          href="{{ url_for('meet_detail', meet_id=meet.id) }}"
+          class="meet-row"
+        >
+          <div class="meet-avatar">{{ meet.name[0].upper() }}</div>
+          <div class="meet-info">
+            <span class="meet-name">{{ meet.name }}</span>
+            <span class="meet-date">{{ meet.date }}</span>
+          </div>
+          <ion-icon name="chevron-forward" class="meet-chevron"></ion-icon>
+        </a>
+        <form
+          method="POST"
+          action="{{ url_for('delete_meet', meet_id=meet.id) }}"
+          onsubmit="return confirm('Delete {{ meet.name }} and all its data?')"
+        >
+          <button type="submit" class="delete-meet-btn" title="Delete Meet">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </form>
+      </div>
       {% endfor %}
     </div>
 
@@ -43,6 +57,31 @@
 
   <!-- ── Footer ── -->
   <div class="home-footer">
+    <!-- Import form -->
+    <form
+      method="POST"
+      action="{{ url_for('import_csv') }}"
+      enctype="multipart/form-data"
+      class="import-form"
+    >
+      <label for="csv_file" class="import-label">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        Import CSV
+      </label>
+      <input
+        type="file"
+        id="csv_file"
+        name="csv_file"
+        accept=".csv"
+        onchange="this.form.submit()"
+      />
+    </form>
+
+    <a href="{{ url_for('export_csv') }}" class="export-btn">
+      <ion-icon name="cloud-download-outline"></ion-icon>
+      Export CSV
+    </a>
+
     <a href="{{ url_for('create_meet') }}" class="create-meet-btn">
       <ion-icon name="add"></ion-icon>
       Create Meet

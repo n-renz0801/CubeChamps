@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import re
 import uuid
+import csv
+import io
+from flask import Response, flash
 
 PLAIN_NUMBER = re.compile(r'^\d+(\.\d+)?$')
 PLUS2        = re.compile(r'^(\d+(\.\d+)?)\+2$')
@@ -198,6 +201,27 @@ def create_meet():
         return redirect(url_for('meet_detail', meet_id=new_meet.id))
 
     return render_template('create_meet.html')
+
+
+@app.route("/meet/<int:meet_id>/delete", methods=["POST"])
+def delete_meet(meet_id):
+    meet = CubeMeet.query.get_or_404(meet_id)
+
+    # Get all competitor IDs for this meet
+    competitor_ids = [c.id for c in Competitor.query.filter_by(cubemeet_id=meet_id).all()]
+
+    # Delete solves referencing those competitors first
+    if competitor_ids:
+        Solve.query.filter(Solve.competitor_id.in_(competitor_ids)).delete(synchronize_session=False)
+
+    # Now safe to delete competitors
+    Competitor.query.filter_by(cubemeet_id=meet_id).delete()
+
+    # Cascade handles events → rounds → solves linked via event/round FKs
+    db.session.delete(meet)
+    db.session.commit()
+
+    return redirect(url_for('home'))
 
 
 @app.route("/meet/<int:meet_id>")
@@ -532,6 +556,144 @@ def podiums(meet_id):
         not_homepage=True
     )
 
+
+
+
+@app.route("/export/csv")
+def export_csv():
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow([
+        'meet_name', 'meet_date',
+        'event_name', 'round_number',
+        'competitor_name',
+        'attempt1', 'attempt2', 'attempt3', 'attempt4', 'attempt5'
+    ])
+
+    # Data
+    solves = (
+        Solve.query
+        .join(Round, Solve.round_id == Round.id)
+        .join(Event, Solve.event_id == Event.id)
+        .join(CubeMeet, Event.cubemeet_id == CubeMeet.id)
+        .join(Competitor, Solve.competitor_id == Competitor.id)
+        .filter(
+            Competitor.name != '',
+            ~Competitor.name.like('__tmp_%')
+        )
+        .all()
+    )
+
+    for solve in solves:
+        event = solve.round.event
+        meet  = event.cubemeet
+        writer.writerow([
+            meet.name,
+            meet.date.strftime('%Y-%m-%d'),
+            event.name,
+            solve.round.round_number,
+            solve.competitor.name,
+            solve.attempt1 or '',
+            solve.attempt2 or '',
+            solve.attempt3 or '',
+            solve.attempt4 or '',
+            solve.attempt5 or '',
+        ])
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=cubechamps_export.csv'}
+    )
+
+
+@app.route("/import/csv", methods=["POST"])
+def import_csv():
+    file = request.files.get('csv_file')
+    if not file or not file.filename.endswith('.csv'):
+        return "Invalid file.", 400
+
+    stream   = io.StringIO(file.stream.read().decode("utf-8"))
+    reader   = csv.DictReader(stream)
+    imported = 0
+    skipped  = 0
+
+    for row in reader:
+        meet_name       = row['meet_name'].strip()
+        meet_date_str   = row['meet_date'].strip()
+        event_name      = row['event_name'].strip()
+        round_number    = int(row['round_number'])
+        competitor_name = row['competitor_name'].strip()
+
+        if not meet_name or not competitor_name:
+            skipped += 1
+            continue
+
+        # Get or create meet
+        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y'):
+            try:
+                meet_date = datetime.strptime(meet_date_str, fmt).date()
+                break
+            except ValueError:
+                continue
+        else:
+            skipped += 1
+            continue
+
+        meet = CubeMeet.query.filter_by(name=meet_name, date=meet_date).first()
+        if not meet:
+            meet = CubeMeet(name=meet_name, date=meet_date)
+            db.session.add(meet)
+            db.session.flush()
+
+        # Get or create event
+        event = Event.query.filter_by(name=event_name, cubemeet_id=meet.id).first()
+        if not event:
+            event = Event(name=event_name, cubemeet_id=meet.id)
+            db.session.add(event)
+            db.session.flush()
+
+        # Get or create round
+        round_obj = Round.query.filter_by(event_id=event.id, round_number=round_number).first()
+        if not round_obj:
+            round_obj = Round(event_id=event.id, round_number=round_number)
+            db.session.add(round_obj)
+            db.session.flush()
+
+        # Get or create competitor
+        competitor = Competitor.query.filter_by(name=competitor_name, cubemeet_id=meet.id).first()
+        if not competitor:
+            competitor = Competitor(name=competitor_name, cubemeet_id=meet.id)
+            db.session.add(competitor)
+            db.session.flush()
+
+        # Skip if solve already exists for this competitor in this round
+        existing_solve = Solve.query.filter_by(
+            competitor_id=competitor.id,
+            round_id=round_obj.id
+        ).first()
+        if existing_solve:
+            skipped += 1
+            continue
+
+        solve = Solve(
+            event_id=event.id,
+            round_id=round_obj.id,
+            competitor_id=competitor.id,
+            attempt1=row['attempt1'].strip() or None,
+            attempt2=row['attempt2'].strip() or None,
+            attempt3=row['attempt3'].strip() or None,
+            attempt4=row['attempt4'].strip() or None,
+            attempt5=row['attempt5'].strip() or None,
+        )
+        db.session.add(solve)
+        imported += 1
+
+    db.session.commit()
+    return redirect(url_for('home') + f'?imported={imported}&skipped={skipped}')
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
